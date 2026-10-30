@@ -23,10 +23,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
-      - name: Collect site files
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # Ship one minified bundle with no exports instead of the raw ES modules, so the
+      # game's internals (score, save data, achievements) can't be imported from the console.
+      - name: Build site
         run: |
           mkdir _site
-          cp -r index.html favicon.svg css src _site/
+          cp -r index.html favicon.svg css _site/
+          npx --yes esbuild@0.24.0 src/main.js --bundle --minify --format=iife --outfile=_site/game.js
+          sed -i 's#<script type="module" src="src/main.js"></script>#<script defer src="game.js"></script>#' _site/index.html
+          grep -q 'src="game.js"' _site/index.html
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

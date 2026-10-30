@@ -39,6 +39,9 @@ export class Blob {
     this.fresh = true;     // hasn't touched anything since launch
     this.hit = false;      // touched something this step
     this.power = 0;        // launch power 0..1
+    this.launched = false; // came from the player (not from a merge)
+    this.sideHit = false;  // has touched a side wall
+    this.bank = false;     // first contact after launch was a side wall
   }
 
   setVelocity(vx, vy) { this.vx.fill(vx); this.vy.fill(vy); }

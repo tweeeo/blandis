@@ -10,29 +10,73 @@ import { save, persist } from './storage.js';
 import { theme, hsl } from './themes.js';
 import { t } from './i18n.js';
 import { sfx, buzz } from './audio.js';
-import { unlock } from './achievements.js';
+import { checkAchievements } from './achievements.js';
+
+// Captured at load, before any console script could replace them.
+const wallNow = Date.now;
 
 /** States: attract (menu backdrop) | play | paused | ending (popping animation) | over */
 export class Game {
+  // Score and time live in private fields: they can't be read or written from outside the class.
+  // A masked copy of each is kept too; if the two ever disagree the run was tampered with.
+  #score = 0; #scoreMask = 0;
+  #time = 0; #timeMask = 0;
+  #key = 0;
+  #wallStart = 0; #pausedAt = 0; #pausedMs = 0;
+  #run = null;
+  #committed = true;
+  #lastCheck = 0;
+
   constructor() {
     this.world = new World();
     this.fx = new Effects();
     this.state = 'attract';
     this.clock = 0;
+    this.tampered = false;
     this.onOver = () => {};
     this.reset();
   }
 
+  get score() { return this.#score; }
+  get time() { return this.#time; }
+
+  #addScore(pts) {
+    this.#verify();
+    this.#score += pts; this.#scoreMask = (this.#score ^ this.#key) >>> 0;
+  }
+  #addTime(dt) {
+    this.#verify();
+    this.#time += dt; this.#timeMask = this.#time * 7 + this.#key;
+  }
+  /** Masked copies must match, and game time can never run ahead of the real clock. */
+  #verify() {
+    const realSec = (wallNow() - this.#wallStart - this.#pausedMs - (this.#pausedAt ? wallNow() - this.#pausedAt : 0)) / 1000;
+    if (((this.#score ^ this.#key) >>> 0) !== this.#scoreMask
+      || Math.abs(this.#time * 7 + this.#key - this.#timeMask) > 1e-6
+      || (this.state === 'play' && this.#time > realSec + 2)) this.tampered = true;
+    return !this.tampered;
+  }
+
   reset() {
+    this.#commitRun();
     this.world.clear(); this.fx.clear();
-    this.score = 0; this.time = 0; this.combo = 0; this.lastMerge = -9; this.maxLevel = 0;
-    this.dangerT = 0; this.cooldown = 0; this.gentleRun = 0; this.endTimer = 0;
+    this.#key = (Math.random() * 0xffffffff) >>> 0;
+    this.#score = 0; this.#scoreMask = this.#key;
+    this.#time = 0; this.#timeMask = this.#key;
+    this.#wallStart = wallNow(); this.#pausedAt = 0; this.#pausedMs = 0; this.#lastCheck = 0;
+    this.#run = {
+      merges: 0, launches: 0, hardLaunches: 0, maxCombo: 0, gentleRun: 0, nearDeath: false,
+      flags: { cannon: false, bank: false, feather: false, closeCall: false, supreme: false },
+    };
+    this.tampered = false;
+    this.combo = 0; this.lastMerge = -9; this.maxLevel = 0;
+    this.dangerT = 0; this.cooldown = 0; this.endTimer = 0;
     this.isNewBest = false; this.aim = null;
     this.nextLevel = randomSpawnLevel();
     this.newHand();
   }
 
-  start() { this.reset(); this.state = 'play'; }
+  start() { this.reset(); this.state = 'play'; this.#committed = false; }
 
   /** A pile of blobs falling behind the main menu. */
   attract() {
@@ -44,11 +88,40 @@ export class Game {
     }
   }
 
-  pause() { if (this.state === 'play') { this.state = 'paused'; this.aim = null; } }
-  resume() { if (this.state === 'paused') this.state = 'play'; }
+  pause() { if (this.state === 'play') { this.state = 'paused'; this.aim = null; this.#pausedAt = wallNow(); } }
+  resume() {
+    if (this.state !== 'paused') return;
+    this.state = 'play';
+    this.#pausedMs += wallNow() - this.#pausedAt; this.#pausedAt = 0;
+  }
   get running() { return this.state !== 'paused' && this.state !== 'over'; }
 
   newHand() { this.hand = { level: this.nextLevel, scale: 0.2, scaleV: 0 }; this.nextLevel = randomSpawnLevel(this.maxLevel); }
+
+  /** Read-only snapshot used by the achievement checks. */
+  #context() {
+    const r = this.#run, s = save.stats;
+    return {
+      score: this.#score, time: this.#time, maxLevel: this.maxLevel, blobs: this.world.blobs.length,
+      merges: r.merges, launches: r.launches, hardLaunches: r.hardLaunches, maxCombo: r.maxCombo,
+      gentleRun: r.gentleRun, flags: { ...r.flags },
+      life: {
+        games: s.games + (this.#committed ? 0 : 1), merges: s.merges + r.merges,
+        launches: s.launches + r.launches, playTime: s.playTime + this.#time,
+      },
+    };
+  }
+  #check() { if (this.state === 'play' && this.#verify()) checkAchievements(this.#context()); }
+
+  /** Add this run to the lifetime stats (once), unless it was tampered with. */
+  #commitRun() {
+    if (this.#committed || !this.#run) return;
+    this.#committed = true;
+    if (!this.#verify()) return;
+    const s = save.stats, r = this.#run;
+    s.games++; s.merges += r.merges; s.launches += r.launches; s.playTime += this.#time;
+    persist();
+  }
 
   // ---- Aiming: drag toward where the blob should go ----
   get canAim() { return this.state === 'play' && !!this.hand; }
@@ -74,14 +147,16 @@ export class Game {
   handPos() { return { x: LAUNCH_X, y: LAUNCH_Y }; }
 
   launch() {
-    const pull = this.aimPull(), power = this.aimPower(), pos = this.handPos();
+    const pull = this.aimPull(), power = this.aimPower(), pos = this.handPos(), r = this.#run;
     const b = this.world.add(new Blob(this.hand.level, pos.x, pos.y));
     if (power >= TAP_POWER) b.setVelocity(pull.x * PULL_SPEED, pull.y * PULL_SPEED);
-    b.power = power;
+    b.power = power; b.launched = true;
     sfx.launch(power); buzz(8);
-    this.gentleRun = power < 0.25 ? this.gentleRun + 1 : 0;
-    if (this.gentleRun >= 10) unlock('gentle');
+    r.launches++;
+    if (power > 0.5) r.hardLaunches++;
+    r.gentleRun = power < 0.25 ? r.gentleRun + 1 : 0;
     this.hand = null; this.cooldown = LAUNCH_COOLDOWN;
+    this.#check();
   }
 
   merge(a, b) {
@@ -89,7 +164,7 @@ export class Game {
     const m = a.mass + b.mass;
     const cx = (a.cx * a.mass + b.cx * b.mass) / m, cy = (a.cy * a.mass + b.cy * b.mass) / m;
     const vx = (a.vcx * a.mass + b.vcx * b.mass) / m, vy = (a.vcy * a.mass + b.vcy * b.mass) / m;
-    const L = a.level + 1, playing = this.state === 'play', fx = this.fx;
+    const L = a.level + 1, playing = this.state === 'play', fx = this.fx, r = this.#run;
     this.combo = this.clock - this.lastMerge < COMBO_WINDOW ? this.combo + 1 : 1;
     this.lastMerge = this.clock;
 
@@ -101,30 +176,28 @@ export class Game {
 
     if (playing) {
       const pts = valueOf(L) * this.combo;
-      this.score += pts;
+      this.#addScore(pts);
       fx.text(cx, cy - 10, '+' + pts, 26 + L * 2);
       if (this.combo > 1) fx.text(cx, cy - 44, 'x' + this.combo + '!', 34 + this.combo * 3, true);
-      unlock('first');
-      if (this.combo >= 4) unlock('combo4');
-      if (this.score >= 1000) unlock('s1000');
-      if ([a, b].some(o => o.power > 0.95 && o.age < 3)) unlock('cannon');
+      r.merges++;
+      r.maxCombo = Math.max(r.maxCombo, this.combo);
+      const recent = [a, b].filter(o => o.age < 4);
+      if (recent.some(o => o.launched && o.power > 0.95)) r.flags.cannon = true;
+      if (recent.some(o => o.bank)) r.flags.bank = true;
+      if (recent.some(o => o.launched && o.power < TAP_POWER)) r.flags.feather = true;
     }
     sfx.merge(L, this.combo); buzz(12 + L * 3);
 
     let R = radiusOf(Math.min(L, MAX_LEVEL));
     if (a.level === MAX_LEVEL) {
       // Two 2048s vanish in a shower
-      if (playing) { this.score += 8192; fx.text(cx, cy, t('supreme'), 44, true, 1.6); }
+      if (playing) { this.#addScore(8192); r.flags.supreme = true; fx.text(cx, cy, t('supreme'), 44, true, 1.6); }
       fx.burst(cx, cy, '#fff', 60, 700, 7); fx.addShake(24, 24); sfx.boom(); buzz([30, 40, 60]);
       R *= 2;
     } else {
       const nb = this.world.add(new Blob(L, Math.max(WALL_L + R * 0.6, Math.min(WALL_R - R * 0.6, cx)), cy, 0.78));
       nb.setVelocity(vx * 0.5, vy * 0.5); nb.happy = 1.3; nb.fresh = false; nb.age = 0.4;
-      if (playing && L > this.maxLevel) {
-        this.maxLevel = L;
-        if (L >= 6) unlock('lvl7');
-        if (L === MAX_LEVEL) unlock('max');
-      }
+      if (playing && L > this.maxLevel) this.maxLevel = L;
     }
 
     // Shove neighbours outward: the satisfying "squish wave"
@@ -136,6 +209,7 @@ export class Game {
       const f = (1 - d / reach) * (120 + L * 10) * Math.min(1, Math.sqrt(o.r / R));
       for (let i = 0; i < o.n; i++) { o.vx[i] += dx / d * f; o.vy[i] += dy / d * f; }
     }
+    this.#check();
   }
 
   tick(dt) {
@@ -145,7 +219,11 @@ export class Game {
 
     for (const b of world.blobs) {
       b.update(dt);
-      if (b.fresh && b.hit) { b.fresh = false; sfx.plop(Math.hypot(b.vcx, b.vcy)); }
+      if (b.fresh && b.hit) {
+        b.fresh = false;
+        b.bank = b.launched && b.sideHit;   // first thing it touched was a side wall
+        sfx.plop(Math.hypot(b.vcx, b.vcy));
+      }
       b.hit = false;
     }
     if (world.contacts.length) {
@@ -158,23 +236,30 @@ export class Game {
     if (hand) { hand.scaleV += ((1 - hand.scale) * 300 - hand.scaleV * 10) * dt; hand.scale += hand.scaleV * dt; }
 
     if (this.state === 'play') {
-      this.time += dt;
+      this.#addTime(dt);
       if (!hand) { this.cooldown -= dt; if (this.cooldown <= 0) this.newHand(); }
       const over = world.blobs.some(b => b.age > 1.2 && b.minY < DANGER && Math.hypot(b.vcx, b.vcy) < 260);
       this.dangerT = over ? this.dangerT + dt : Math.max(0, this.dangerT - dt * 2);
+      const r = this.#run;
+      if (this.dangerT > DANGER_TIME - 0.5) r.nearDeath = true;
+      if (this.dangerT === 0 && r.nearDeath) { r.nearDeath = false; r.flags.closeCall = true; }
       if (this.dangerT > DANGER_TIME) this.gameOver();
+      else if (this.#time - this.#lastCheck >= 1) { this.#lastCheck = this.#time; this.#check(); }
     } else if (this.state === 'ending') {
       this.tickEnding(dt);
     }
   }
 
   gameOver() {
+    this.#check();
     this.state = 'ending'; this.endTimer = 0.6; this.aim = null; this.hand = null; this.dangerT = 0;
     sfx.over(); buzz([40, 60, 40]);
-    this.isNewBest = this.score > save.best;
-    if (this.isNewBest) save.best = this.score;
-    save.top = [...save.top, this.score].sort((a, b) => b - a).slice(0, 5);
-    persist();
+    if (this.#verify()) {
+      this.isNewBest = this.#score > save.best;
+      if (this.isNewBest) save.best = this.#score;
+      save.top = [...save.top, this.#score].sort((a, b) => b - a).slice(0, 5);
+    }
+    this.#commitRun();
   }
 
   // Pop the remaining blobs one by one, top first, then show the results.

@@ -5,6 +5,7 @@ import { G, DAMP, K_SHAPE, K_EDGE, K_SMOOTH, K_AREA, WALL_L, WALL_R, FLOOR } fro
 
 const CORE = 0.45;     // core radius as a fraction of the blob radius
 const RESCUE = 3;      // px per substep to push out a swallowed blob
+const MAX_STRETCH = 1.22; // max perimeter vs. the round shape (a square is 1.13, a triangle 1.29)
 
 export class World {
   constructor() {
@@ -77,15 +78,18 @@ function edges(b) {
   const n = b.n, px = b.px, py = b.py;
   let P = 0;
   for (let i = 0; i < n; i++) { const j = (i + 1) % n; P += Math.hypot(px[j] - px[i], py[j] - py[i]); }
-  const L = Math.max(b.edge * b.scale, P / n);
+  // ...but only up to MAX_STRETCH, or a squeezed blob turns into a long tendril.
+  const rest = b.edge * b.scale, L = Math.min(Math.max(rest, P / n), rest * MAX_STRETCH);
+  // Over-stretched blobs pull back firmly and get extra surface tension.
+  const over = P / n > rest * MAX_STRETCH, kEdge = over ? 0.7 : K_EDGE, kSmooth = over ? K_SMOOTH * 3 : K_SMOOTH;
   for (let i = 0; i < n; i++) {
     const p = (i + n - 1) % n, j = (i + 1) % n;
-    px[i] += ((px[p] + px[j]) / 2 - px[i]) * K_SMOOTH; py[i] += ((py[p] + py[j]) / 2 - py[i]) * K_SMOOTH;
+    px[i] += ((px[p] + px[j]) / 2 - px[i]) * kSmooth; py[i] += ((py[p] + py[j]) / 2 - py[i]) * kSmooth;
   }
   for (let i = 0; i < n; i++) {
     const j = (i + 1) % n, dx = px[j] - px[i], dy = py[j] - py[i], d = Math.hypot(dx, dy);
     if (d < 1e-6) continue;
-    const k = (d - L) / d * 0.5 * K_EDGE;
+    const k = (d - L) / d * 0.5 * kEdge;
     px[i] += dx * k; py[i] += dy * k; px[j] -= dx * k; py[j] -= dy * k;
   }
 }
@@ -171,8 +175,8 @@ function pointsInto(a, b) {
 
 function walls(b) {
   for (let i = 0; i < b.n; i++) {
-    if (b.px[i] < WALL_L) { b.px[i] = WALL_L; b.touch[i] = 1; b.hit = true; }
-    else if (b.px[i] > WALL_R) { b.px[i] = WALL_R; b.touch[i] = 1; b.hit = true; }
+    if (b.px[i] < WALL_L) { b.px[i] = WALL_L; b.touch[i] = 1; b.hit = b.sideHit = true; }
+    else if (b.px[i] > WALL_R) { b.px[i] = WALL_R; b.touch[i] = 1; b.hit = b.sideHit = true; }
     if (b.py[i] > FLOOR) { b.py[i] = FLOOR; b.touch[i] = 2; b.hit = true; }
     else if (b.py[i] < 0) { b.py[i] = 0; b.touch[i] = 2; }
   }

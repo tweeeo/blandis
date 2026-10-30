@@ -36,7 +36,10 @@ addEventListener('beforeunload', e => {
 });
 document.addEventListener('visibilitychange', () => { if (document.hidden && game.state === 'play') menu.togglePause(); });
 
-// Fixed-timestep loop; at most 3 physics steps per frame so slow devices don't spiral.
+// Fixed-timestep loop; at most 3 physics steps per frame so slow devices don't spiral
+// (this also means game time can never run faster than real time).
+// rAF is captured now so a console script can't swap it later to speed the game up.
+const raf = window.requestAnimationFrame.bind(window);
 let last = performance.now(), acc = 0;
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
@@ -48,14 +51,14 @@ function frame(now) {
   }
   game.fx.update(dt);
   renderer.draw();
-  requestAnimationFrame(frame);
+  raf(frame);
 }
 
 if (!isThemeUnlocked(save.theme)) save.theme = 'clasico';
 applyTheme();
 game.attract();
 menu.show('start');
-requestAnimationFrame(frame);
+raf(frame);
 
-// Handy for debugging in the console.
-window.blandis = { game, renderer, menu };
+// Nothing is exposed globally in production. For local debugging only:
+if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') window.blandis = { game, renderer, menu };

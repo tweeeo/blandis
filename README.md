@@ -17,7 +17,7 @@
 
 - Real soft-body physics: every blob is a squishy ring that keeps its volume and deforms to fill the gaps around it.
 - Juicy feedback: squish waves, particles, screen shake, synthesized sound effects and haptics on mobile.
-- 7 achievements, each unlocking a color style (Vivid, Cozy, Neon, Cloud, Ocean, Caramel, Night, Rainbow).
+- 35 achievements to collect (merges, score, combos, skill shots, survival, lifetime stats…); 7 of them unlock color styles (Cozy, Neon, Cloud, Ocean, Caramel, Night, Rainbow).
 - Best score, top-5 and run timer; 64s join the mix once you reach 256, so the jar gets tighter as you go.
 - Accidental reloads (F5, Ctrl+R, closing the tab) ask for confirmation during a run.
 - English and Spanish (Settings → Language).
@@ -57,7 +57,25 @@ This repo includes a workflow (`.github/workflows/pages.yml`) that publishes the
 2. On GitHub go to **Settings → Pages → Build and deployment → Source** and choose **GitHub Actions**.
 3. Wait for the **Deploy to GitHub Pages** action to finish (tab **Actions**). Your game will be live at `https://<your-user>.github.io/<your-repo>/` (this one lives at https://u0f.github.io/blandis/).
 
-Because it's plain static files, it also works as-is on Netlify, Vercel, Cloudflare Pages or itch.io (upload the folder as an HTML5 game).
+The workflow bundles `src/` into a single minified `game.js` with [esbuild](https://esbuild.github.io/), so the published site doesn't expose the game's modules.
+
+For other static hosts (Netlify, Vercel, Cloudflare Pages, itch.io) you can upload the folder as-is, or build the same bundle yourself:
+
+```bash
+npx esbuild src/main.js --bundle --minify --format=iife --outfile=dist/game.js
+```
+
+## Anti-cheat
+
+Everything runs in the browser, so nothing is 100% cheat-proof — but casual console tricks don't work:
+
+- No global handle to the game in production, and the deployed code is a single bundle with no exports, so its modules can't be imported from the console.
+- Score and time live in private class fields with masked copies; any mismatch flags the run.
+- Game time can never run ahead of the real clock (fixed timestep capped per frame, `requestAnimationFrame` and `Date.now` captured at load). Speeding the game up flags the run.
+- Flagged runs don't save scores, stats or achievements.
+- Save data in `localStorage` is signed; editing it by hand wipes progress instead of granting it.
+
+A real online leaderboard would still need server-side validation.
 
 ## Project structure
 
@@ -78,7 +96,7 @@ src/
   achievements.js       Achievement list and unlocking
   themes.js             Color styles
   i18n.js               English / Spanish strings
-  storage.js            localStorage save data
+  storage.js            Signed localStorage save data
   ui/
     menu.js             Overlay menus and top-right buttons
     toast.js            Achievement pop-up
