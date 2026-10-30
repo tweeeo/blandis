@@ -1,0 +1,13 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors / tools
+.vscode/
+.idea/
+.claude/
+.impeccable/
+
+# Local servers / deps
+node_modules/
