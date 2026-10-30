@@ -1,6 +1,6 @@
 // Overlay menus (start, pause, game over, settings, styles, achievements, help) + top-right buttons.
 import { save, persist } from '../storage.js';
-import { t, tx, setLang, LANGS } from '../i18n.js';
+import { t, tx, setLang, LANGS, formatTime } from '../i18n.js';
 import { THEMES, hsl, setTheme } from '../themes.js';
 import { ACHIEVEMENTS, isThemeUnlocked } from '../achievements.js';
 import { sfx, unlockAudio } from '../audio.js';
@@ -68,6 +68,7 @@ export class Menu {
           ${btn('help', t('help'))}${btn('menu', t('mainMenu'))}`;
       case 'over':
         return `<h2>${t('over')}</h2><div class="score">${g.score}</div>
+          <p class="sub">${t('time')}: <b>${formatTime(g.time)}</b></p>
           ${g.isNewBest && g.score > 0 ? `<span class="badge">${t('newBest')}</span>` : best}
           <ol>${save.top.map(v => `<li>${v}</li>`).join('')}</ol>
           ${btn('play', t('again'), false)}${btn('menu', t('mainMenu'))}`;

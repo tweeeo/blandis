@@ -2,7 +2,7 @@
 import { W, H, WALL_L, WALL_R, FLOOR, JAR_TOP, DANGER, G, MAX_LEVEL, MAX_PULL, PULL_SPEED, TAP_POWER, DANGER_TIME, radiusOf, valueOf } from './config.js';
 import { theme, hsl } from './themes.js';
 import { save } from './storage.js';
-import { t } from './i18n.js';
+import { t, formatTime } from './i18n.js';
 
 const LINE = '#0b0a09';
 const LIGHT = '#fff6ea';
@@ -122,6 +122,7 @@ export class Renderer {
     ctx.font = `900 52px ${FONT}`; ctx.fillText(Math.round(this.shownScore), WALL_L, 46);
     ctx.globalAlpha = 0.6; ctx.font = `800 20px ${FONT}`;
     ctx.fillText(t('best') + ' ' + Math.max(save.best, game.score), WALL_L + 2, 88);
+    ctx.fillText(t('time') + ' ' + formatTime(game.time), WALL_L + 2, 116);
 
     ctx.textAlign = 'center'; ctx.font = `800 18px ${FONT}`;
     ctx.fillText(t('next'), 510, 80); ctx.globalAlpha = 1;

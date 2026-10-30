@@ -46,7 +46,7 @@ export class Blob {
   /** Per-frame bookkeeping that isn't part of the constraint solve. */
   update(dt) {
     this.age += dt;
-    this.scaleV += ((1 - this.scale) * 320 - this.scaleV * 11) * dt;
+    this.scaleV += ((1 - this.scale) * 160 - this.scaleV * 13) * dt;
     this.scale += this.scaleV * dt;
     if (this.happy > 0) this.happy -= dt;
   }

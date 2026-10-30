@@ -19,13 +19,20 @@ export const TAP_POWER = 0.04;                    // below this a drag is a gent
 export const LAUNCH_COOLDOWN = 0.45;
 export const COMBO_WINDOW = 1.0;
 export const DANGER_TIME = 3;
-export const SPAWN_WEIGHTS = [30, 28, 22, 14, 6];  // chance of spawning 2, 4, 8, 16, 32
+// Relative chance of spawning 2, 4, 8, 16, 32, 64. 64 only appears once a 256 exists:
+// a wider mix means fewer matching pairs, while keeping spawns small so value isn't handed out.
+export const SPAWN_WEIGHTS = [30, 28, 22, 14, 8, 5];
 
-export const radiusOf = level => 23 * Math.pow(1.19, level);
+// Sizes are tuned so a near-complete chain (2 … 2048) almost fills the jar.
+export const radiusOf = level => 28 * Math.pow(1.21, level);
 export const valueOf = level => 2 ** (level + 1);
 
-export function randomSpawnLevel() {
-  let r = Math.random() * SPAWN_WEIGHTS.reduce((a, b) => a + b, 0);
-  for (let l = 0; l < SPAWN_WEIGHTS.length; l++) { r -= SPAWN_WEIGHTS[l]; if (r < 0) return l; }
+/** Highest level that can spawn, given the biggest number made so far. */
+export const maxSpawnLevel = maxLevel => (maxLevel >= 7 ? 5 : 4);
+
+export function randomSpawnLevel(maxLevel = 0) {
+  const w = SPAWN_WEIGHTS.slice(0, maxSpawnLevel(maxLevel) + 1);
+  let r = Math.random() * w.reduce((a, b) => a + b, 0);
+  for (let l = 0; l < w.length; l++) { r -= w[l]; if (r < 0) return l; }
   return 0;
 }

@@ -24,7 +24,16 @@ canvas.addEventListener('pointerdown', e => {
 canvas.addEventListener('pointermove', e => game.moveAim(worldPoint(e), e.pointerId));
 canvas.addEventListener('pointerup', e => game.releaseAim(worldPoint(e), e.pointerId));
 canvas.addEventListener('pointercancel', () => game.cancelAim());
-addEventListener('keydown', e => { if (e.key === 'Escape' || e.key === 'p') menu.togglePause(); });
+addEventListener('keydown', e => {
+  if (e.key === 'Escape' || e.key === 'p') menu.togglePause();
+  // F5 / Ctrl+R / Cmd+R would throw away the run without asking.
+  if (e.key === 'F5' || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'r')) e.preventDefault();
+});
+addEventListener('contextmenu', e => e.preventDefault());
+// Reload button, closing the tab, etc.: the browser shows its own "Leave site?" confirmation.
+addEventListener('beforeunload', e => {
+  if (['play', 'paused', 'ending'].includes(game.state)) { e.preventDefault(); e.returnValue = ''; }
+});
 document.addEventListener('visibilitychange', () => { if (document.hidden && game.state === 'play') menu.togglePause(); });
 
 // Fixed-timestep loop; at most 3 physics steps per frame so slow devices don't spiral.

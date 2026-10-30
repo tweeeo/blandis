@@ -25,7 +25,7 @@ export class Game {
 
   reset() {
     this.world.clear(); this.fx.clear();
-    this.score = 0; this.combo = 0; this.lastMerge = -9; this.maxLevel = 0;
+    this.score = 0; this.time = 0; this.combo = 0; this.lastMerge = -9; this.maxLevel = 0;
     this.dangerT = 0; this.cooldown = 0; this.gentleRun = 0; this.endTimer = 0;
     this.isNewBest = false; this.aim = null;
     this.nextLevel = randomSpawnLevel();
@@ -48,7 +48,7 @@ export class Game {
   resume() { if (this.state === 'paused') this.state = 'play'; }
   get running() { return this.state !== 'paused' && this.state !== 'over'; }
 
-  newHand() { this.hand = { level: this.nextLevel, scale: 0.2, scaleV: 0 }; this.nextLevel = randomSpawnLevel(); }
+  newHand() { this.hand = { level: this.nextLevel, scale: 0.2, scaleV: 0 }; this.nextLevel = randomSpawnLevel(this.maxLevel); }
 
   // ---- Aiming: drag toward where the blob should go ----
   get canAim() { return this.state === 'play' && !!this.hand; }
@@ -118,7 +118,7 @@ export class Game {
       fx.burst(cx, cy, '#fff', 60, 700, 7); fx.addShake(24, 24); sfx.boom(); buzz([30, 40, 60]);
       R *= 2;
     } else {
-      const nb = this.world.add(new Blob(L, Math.max(WALL_L + R * 0.6, Math.min(WALL_R - R * 0.6, cx)), cy, 0.62));
+      const nb = this.world.add(new Blob(L, Math.max(WALL_L + R * 0.6, Math.min(WALL_R - R * 0.6, cx)), cy, 0.78));
       nb.setVelocity(vx * 0.5, vy * 0.5); nb.happy = 1.3; nb.fresh = false; nb.age = 0.4;
       if (playing && L > this.maxLevel) {
         this.maxLevel = L;
@@ -132,7 +132,8 @@ export class Game {
       if (o.dead || o.happy > 1.2) continue;
       const dx = o.cx - cx, dy = o.cy - cy, d = Math.hypot(dx, dy) || 1, reach = R * 2.4;
       if (d > reach) continue;
-      const f = (1 - d / reach) * (180 + L * 15);
+      // Small neighbours get a gentler push so they aren't flung across the jar.
+      const f = (1 - d / reach) * (120 + L * 10) * Math.min(1, Math.sqrt(o.r / R));
       for (let i = 0; i < o.n; i++) { o.vx[i] += dx / d * f; o.vy[i] += dy / d * f; }
     }
   }
@@ -157,6 +158,7 @@ export class Game {
     if (hand) { hand.scaleV += ((1 - hand.scale) * 300 - hand.scaleV * 10) * dt; hand.scale += hand.scaleV * dt; }
 
     if (this.state === 'play') {
+      this.time += dt;
       if (!hand) { this.cooldown -= dt; if (this.cooldown <= 0) this.newHand(); }
       const over = world.blobs.some(b => b.age > 1.2 && b.minY < DANGER && Math.hypot(b.vcx, b.vcy) < 260);
       this.dangerT = over ? this.dangerT + dt : Math.max(0, this.dangerT - dt * 2);

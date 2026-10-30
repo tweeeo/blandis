@@ -6,7 +6,7 @@ const STR = {
     best: 'Best', next: 'NEXT', careful: 'Careful!', pause: 'Paused', resume: 'Resume', restart: 'Restart',
     mainMenu: 'Main menu', over: 'It overflowed!', newBest: 'NEW BEST!', again: 'Play again', back: 'Back',
     styles: 'Styles', ach: 'Achievements', language: 'Language', sound: 'Sound', on: 'On', off: 'Off',
-    newStyle: 'New style', style: 'style', supreme: '4096! +8192', soundBtn: 'Sound', menuBtn: 'Menu',
+    newStyle: 'New style', style: 'style', supreme: '4096! +8192', soundBtn: 'Sound', menuBtn: 'Menu', time: 'Time',
     helpList: [
       'Drag toward where you want to launch and release; the further you drag, the harder it goes.',
       'Quick tap: drop the number gently.',
@@ -22,7 +22,7 @@ const STR = {
     best: 'Récord', next: 'SIGUIENTE', careful: '¡Cuidado!', pause: 'Pausa', resume: 'Continuar', restart: 'Reiniciar',
     mainMenu: 'Menú principal', over: '¡Se desbordó!', newBest: '¡NUEVO RÉCORD!', again: 'Otra vez', back: 'Volver',
     styles: 'Estilos', ach: 'Logros', language: 'Idioma', sound: 'Sonido', on: 'Sí', off: 'No',
-    newStyle: 'Nuevo estilo', style: 'estilo', supreme: '¡4096! +8192', soundBtn: 'Sonido', menuBtn: 'Menú',
+    newStyle: 'Nuevo estilo', style: 'estilo', supreme: '¡4096! +8192', soundBtn: 'Sonido', menuBtn: 'Menú', time: 'Tiempo',
     helpList: [
       'Arrastra hacia donde quieras lanzar y suelta; cuanto más arrastras, más fuerte.',
       'Toque corto: deja caer el número suavemente.',
@@ -41,6 +41,8 @@ export const LANGS = { en: 'English', es: 'Español' };
 export const t = key => STR[save.lang][key];
 /** Pick the current language from an inline `{ en, es }` object. */
 export const tx = obj => obj[save.lang];
+/** Seconds -> "m:ss". */
+export const formatTime = sec => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, '0')}`;
 
 export function setLang(lang) {
   save.lang = lang;

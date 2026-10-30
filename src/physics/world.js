@@ -3,6 +3,9 @@
 //   -> blob/blob collisions -> walls -> derive velocities.
 import { G, DAMP, K_SHAPE, K_EDGE, K_SMOOTH, K_AREA, WALL_L, WALL_R, FLOOR } from '../config.js';
 
+const CORE = 0.45;     // core radius as a fraction of the blob radius
+const RESCUE = 3;      // px per substep to push out a swallowed blob
+
 export class World {
   constructor() {
     this.blobs = [];
@@ -29,6 +32,7 @@ export class World {
       for (let j = i + 1; j < blobs.length; j++) {
         const b = blobs[j];
         if (a.maxX < b.minX || b.maxX < a.minX || a.maxY < b.minY || b.maxY < a.minY) continue;
+        separateCores(a, b);
         if (pointsInto(a, b) | pointsInto(b, a)) {
           a.hit = b.hit = true;
           if (a.level === b.level) this.contacts.push([a, b]);
@@ -110,17 +114,42 @@ function bbox(b) {
   b.minX = x0 - 2; b.maxX = x1 + 2; b.minY = y0 - 2; b.maxY = y1 + 2;
 }
 
+function insidePolygon(x, y, b) {
+  const bx = b.px, by = b.py, n = b.n;
+  let inside = false;
+  for (let j = 0, k = n - 1; j < n; k = j++) {
+    if ((by[j] > y) !== (by[k] > y) && x < (bx[k] - bx[j]) * (y - by[j]) / (by[k] - by[j]) + bx[j]) inside = !inside;
+  }
+  return inside;
+}
+
+function translate(b, dx, dy) {
+  for (let i = 0; i < b.n; i++) { b.px[i] += dx; b.py[i] += dy; }
+  b.cx += dx; b.cy += dy;
+}
+
+// Each blob has a solid core (half its radius) that others can't enter, and a blob whose
+// centre ended up inside another one (after a hard hit) is pushed back out. Without this a
+// fast blob can get swallowed and both bodies tangle into odd shapes.
+function separateCores(a, b) {
+  let dx = b.cx - a.cx, dy = b.cy - a.cy, d = Math.hypot(dx, dy);
+  if (d < 1e-6) { dx = 0; dy = 1; d = 1; }
+  const nx = dx / d, ny = dy / d;
+  const minD = CORE * (a.r * a.scale + b.r * b.scale);
+  let push = minD > d ? (minD - d) * 0.5 : 0;
+  if (!push && (insidePolygon(a.cx, a.cy, b) || insidePolygon(b.cx, b.cy, a))) push = RESCUE;
+  if (!push) return;
+  const fa = b.mass / (a.mass + b.mass), fb = 1 - fa;
+  translate(a, -nx * push * fa, -ny * push * fa);
+  translate(b, nx * push * fb, ny * push * fb);
+}
+
 // Push every point of `a` that is inside polygon `b` back onto b's surface.
 function pointsInto(a, b) {
   const bx = b.px, by = b.py, n = b.n; let any = false;
   for (let i = 0; i < a.n; i++) {
     const x = a.px[i], y = a.py[i];
-    if (x < b.minX || x > b.maxX || y < b.minY || y > b.maxY) continue;
-    let inside = false;
-    for (let j = 0, k = n - 1; j < n; k = j++) {
-      if ((by[j] > y) !== (by[k] > y) && x < (bx[k] - bx[j]) * (y - by[j]) / (by[k] - by[j]) + bx[j]) inside = !inside;
-    }
-    if (!inside) continue;
+    if (x < b.minX || x > b.maxX || y < b.minY || y > b.maxY || !insidePolygon(x, y, b)) continue;
     let best = 1e18, bj = 0, bt = 0, qx = 0, qy = 0;
     for (let j = 0; j < n; j++) {
       const k = (j + 1) % n, ex = bx[k] - bx[j], ey = by[k] - by[j];
