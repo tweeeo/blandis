@@ -13,15 +13,18 @@ const game = new Game();
 const renderer = new Renderer(canvas, game);
 const menu = new Menu(game);
 
-// Input: drag on the canvas to aim, release to launch.
+// Input: press on a blob in the tray, drag toward where it should go, release to launch.
 const worldPoint = e => renderer.toWorld(e.clientX, e.clientY);
 canvas.addEventListener('pointerdown', e => {
   unlockAudio();
-  if (!game.canAim || game.aim) return;
+  if (!game.canAim) return;
   game.beginAim(worldPoint(e), e.pointerId);
-  canvas.setPointerCapture(e.pointerId);
+  if (game.selected) canvas.setPointerCapture(e.pointerId);
 });
-canvas.addEventListener('pointermove', e => game.moveAim(worldPoint(e), e.pointerId));
+canvas.addEventListener('pointermove', e => {
+  if (game.grip) game.moveAim(worldPoint(e), e.pointerId);
+  else game.setHover(worldPoint(e));
+});
 canvas.addEventListener('pointerup', e => game.releaseAim(worldPoint(e), e.pointerId));
 canvas.addEventListener('pointercancel', () => game.cancelAim());
 addEventListener('keydown', e => {

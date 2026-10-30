@@ -1,7 +1,8 @@
 // Game rules and state machine. Knows nothing about the DOM or canvas.
 import {
-  WALL_L, WALL_R, DANGER, LAUNCH_X, LAUNCH_Y, SUB, MAX_LEVEL, MAX_PULL, PULL_SPEED, TAP_POWER,
-  LAUNCH_COOLDOWN, COMBO_WINDOW, DANGER_TIME, radiusOf, valueOf, randomSpawnLevel,
+  WALL_L, WALL_R, DANGER, SUB, MAX_LEVEL, MAX_PULL, PULL_SPEED, TAP_POWER,
+  TRAY_L, TRAY_R, TRAY_TOP, TRAY_BOT, TRAY_SIZE, TRAY_SPAWN_DELAY,
+  COMBO_WINDOW, DANGER_TIME, radiusOf, valueOf, randomSpawnLevel,
 } from './config.js';
 import { Blob } from './physics/blob.js';
 import { World } from './physics/world.js';
@@ -70,17 +71,15 @@ export class Game {
     };
     this.tampered = false;
     this.combo = 0; this.lastMerge = -9; this.maxLevel = 0;
-    this.dangerT = 0; this.cooldown = 0; this.endTimer = 0;
-    this.isNewBest = false; this.aim = null;
-    this.nextLevel = randomSpawnLevel();
-    this.newHand();
+    this.dangerT = 0; this.spawnTimer = 0; this.endTimer = 0;
+    this.isNewBest = false; this.selected = null; this.grip = null; this.hover = null;
   }
 
   start() { this.reset(); this.state = 'play'; this.#committed = false; }
 
   /** A pile of blobs falling behind the main menu. */
   attract() {
-    this.reset(); this.hand = null; this.state = 'attract';
+    this.reset(); this.state = 'attract';
     for (let i = 0; i < 14; i++) {
       const l = Math.floor(Math.random() * 5), r = radiusOf(l);
       const b = new Blob(l, WALL_L + r + Math.random() * (WALL_R - WALL_L - 2 * r), 300 + i * 40);
@@ -88,7 +87,7 @@ export class Game {
     }
   }
 
-  pause() { if (this.state === 'play') { this.state = 'paused'; this.aim = null; this.#pausedAt = wallNow(); } }
+  pause() { if (this.state === 'play') { this.cancelAim(); this.state = 'paused'; this.#pausedAt = wallNow(); } }
   resume() {
     if (this.state !== 'paused') return;
     this.state = 'play';
@@ -96,13 +95,28 @@ export class Game {
   }
   get running() { return this.state !== 'paused' && this.state !== 'over'; }
 
-  newHand() { this.hand = { level: this.nextLevel, scale: 0.2, scaleV: 0 }; this.nextLevel = randomSpawnLevel(this.maxLevel); }
+  /** Blobs waiting in the tray, left to right. */
+  get tray() { return this.world.blobs.filter(b => b.tray).sort((a, b) => a.cx - b.cx); }
+
+  /** Push a new blob into the tray from the left, if there is room. */
+  #refillTray() {
+    const tray = this.tray;
+    if (tray.length >= TRAY_SIZE) return;
+    const level = randomSpawnLevel(this.maxLevel), r = radiusOf(level);
+    // Room check: a squashed blob takes roughly area / channel height of tray length.
+    const len = b => b.maxX - b.minX, h = TRAY_BOT - TRAY_TOP;
+    const used = tray.reduce((s, b) => s + len(b), 0);
+    if (used + Math.PI * r * r / h + 10 > TRAY_R - TRAY_L) return;
+    if (tray.some(b => b.minX < TRAY_L + Math.min(2 * r, 90))) return;  // entrance still blocked
+    const b = this.world.add(new Blob(level, TRAY_L + Math.min(r, h / 2), (TRAY_TOP + TRAY_BOT) / 2, 0.35));
+    b.tray = true; b.fresh = false;
+  }
 
   /** Read-only snapshot used by the achievement checks. */
   #context() {
     const r = this.#run, s = save.stats;
     return {
-      score: this.#score, time: this.#time, maxLevel: this.maxLevel, blobs: this.world.blobs.length,
+      score: this.#score, time: this.#time, maxLevel: this.maxLevel, blobs: this.world.blobs.filter(b => !b.tray).length,
       merges: r.merges, launches: r.launches, hardLaunches: r.hardLaunches, maxCombo: r.maxCombo,
       gentleRun: r.gentleRun, flags: { ...r.flags },
       life: {
@@ -123,39 +137,60 @@ export class Game {
     persist();
   }
 
-  // ---- Aiming: drag toward where the blob should go ----
-  get canAim() { return this.state === 'play' && !!this.hand; }
-  beginAim(p, id) { if (this.canAim && !this.aim) this.aim = { x0: p.x, y0: p.y, x: p.x, y: p.y, id }; }
-  moveAim(p, id) { if (this.aim && this.aim.id === id) { this.aim.x = p.x; this.aim.y = p.y; } }
-  cancelAim() { this.aim = null; }
-  releaseAim(p, id) {
-    if (!this.aim || this.aim.id !== id) return;
-    this.moveAim(p, id);
-    if (this.canAim) this.launch();
-    this.aim = null;
+  // ---- Pick a tray blob, drag toward where it should go, release to launch ----
+  get canAim() { return this.state === 'play' && !this.selected; }
+
+  /** Tray blob under (or nearest to) a point, within reach. */
+  trayBlobAt(p) {
+    let best = null, bestD = 1e9;
+    for (const b of this.tray) {
+      if (p.x < b.minX - 18 || p.x > b.maxX + 18 || p.y < b.minY - 40 || p.y > b.maxY + 40) continue;
+      const d = Math.abs(p.x - b.cx);
+      if (d < bestD) { bestD = d; best = b; }
+    }
+    return best;
   }
 
-  /** Drag vector clamped to MAX_PULL (world units). */
+  setHover(p) { this.hover = this.state === 'play' && !this.selected ? this.trayBlobAt(p) : null; }
+
+  beginAim(p, id) {
+    if (!this.canAim) return;
+    const b = this.trayBlobAt(p);
+    if (!b) return;
+    this.selected = b; this.hover = null;
+    this.grip = { x0: p.x, y0: p.y, x: p.x, y: p.y, id };
+    sfx.click();
+  }
+  moveAim(p, id) { if (this.grip && this.grip.id === id) { this.grip.x = p.x; this.grip.y = p.y; } }
+  releaseAim(p, id) {
+    if (!this.grip || this.grip.id !== id) return;
+    this.moveAim(p, id);
+    this.#launch();
+  }
+  cancelAim() { this.selected = null; this.grip = null; }
+
+  /** Drag vector from the press point, clamped to MAX_PULL: the launch direction and strength. */
   aimPull() {
-    if (!this.aim) return { x: 0, y: 0 };
-    let x = this.aim.x - this.aim.x0, y = this.aim.y - this.aim.y0;
+    const g = this.grip;
+    if (!g) return { x: 0, y: 0 };
+    let x = g.x - g.x0, y = g.y - g.y0;
     const d = Math.hypot(x, y);
     if (d > MAX_PULL) { x *= MAX_PULL / d; y *= MAX_PULL / d; }
     return { x, y };
   }
   aimPower() { const p = this.aimPull(); return Math.hypot(p.x, p.y) / MAX_PULL; }
-  handPos() { return { x: LAUNCH_X, y: LAUNCH_Y }; }
 
-  launch() {
-    const pull = this.aimPull(), power = this.aimPower(), pos = this.handPos(), r = this.#run;
-    const b = this.world.add(new Blob(this.hand.level, pos.x, pos.y));
-    if (power >= TAP_POWER) b.setVelocity(pull.x * PULL_SPEED, pull.y * PULL_SPEED);
-    b.power = power; b.launched = true;
+  #launch() {
+    const b = this.selected, pull = this.aimPull(), power = this.aimPower(), r = this.#run;
+    this.selected = null; this.grip = null;
+    if (!b || b.dead || !b.tray) return;
+    b.tray = false; b.launched = true; b.power = power; b.age = 0; b.fresh = true; b.sideHit = false;
+    b.setVelocity(power >= TAP_POWER ? pull.x * PULL_SPEED : 0, power >= TAP_POWER ? pull.y * PULL_SPEED : 0);
     sfx.launch(power); buzz(8);
     r.launches++;
     if (power > 0.5) r.hardLaunches++;
     r.gentleRun = power < 0.25 ? r.gentleRun + 1 : 0;
-    this.hand = null; this.cooldown = LAUNCH_COOLDOWN;
+    this.spawnTimer = TRAY_SPAWN_DELAY;
     this.#check();
   }
 
@@ -232,13 +267,11 @@ export class Game {
       world.removeDead();
     }
 
-    const hand = this.hand;
-    if (hand) { hand.scaleV += ((1 - hand.scale) * 300 - hand.scaleV * 10) * dt; hand.scale += hand.scaleV * dt; }
-
     if (this.state === 'play') {
       this.#addTime(dt);
-      if (!hand) { this.cooldown -= dt; if (this.cooldown <= 0) this.newHand(); }
-      const over = world.blobs.some(b => b.age > 1.2 && b.minY < DANGER && Math.hypot(b.vcx, b.vcy) < 260);
+      this.spawnTimer -= dt;
+      if (this.spawnTimer <= 0) { this.#refillTray(); this.spawnTimer = TRAY_SPAWN_DELAY; }
+      const over = world.blobs.some(b => !b.tray && b.age > 1.2 && b.minY < DANGER && Math.hypot(b.vcx, b.vcy) < 260);
       this.dangerT = over ? this.dangerT + dt : Math.max(0, this.dangerT - dt * 2);
       const r = this.#run;
       if (this.dangerT > DANGER_TIME - 0.5) r.nearDeath = true;
@@ -252,7 +285,7 @@ export class Game {
 
   gameOver() {
     this.#check();
-    this.state = 'ending'; this.endTimer = 0.6; this.aim = null; this.hand = null; this.dangerT = 0;
+    this.state = 'ending'; this.endTimer = 0.6; this.selected = null; this.grip = null; this.hover = null; this.dangerT = 0;
     sfx.over(); buzz([40, 60, 40]);
     if (this.#verify()) {
       this.isNewBest = this.#score > save.best;

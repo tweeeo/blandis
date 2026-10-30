@@ -1,5 +1,8 @@
 // Draws the game onto the canvas. Reads game state, never changes it.
-import { W, H, WALL_L, WALL_R, FLOOR, JAR_TOP, DANGER, G, MAX_LEVEL, MAX_PULL, PULL_SPEED, TAP_POWER, DANGER_TIME, radiusOf, valueOf } from './config.js';
+import {
+  W, H, WALL_L, WALL_R, FLOOR, JAR_TOP, DANGER, MAX_LEVEL, DANGER_TIME, TAP_POWER,
+  TRAY_L, TRAY_R, TRAY_TOP, TRAY_BOT, valueOf,
+} from './config.js';
 import { theme, hsl } from './themes.js';
 import { save } from './storage.js';
 import { t, formatTime } from './i18n.js';
@@ -15,7 +18,6 @@ export class Renderer {
     this.game = game;
     this.view = { s: 1, ox: 0, oy: 0, dpr: 1 };
     this.shownScore = 0;
-    this.hx = new Float64Array(28); this.hy = new Float64Array(28);
     this.resize();
     addEventListener('resize', () => this.resize());
   }
@@ -41,9 +43,9 @@ export class Renderer {
     ctx.setTransform(dpr * s, 0, 0, dpr * s, dpr * (ox + shx * s), dpr * (oy + shy * s));
 
     this.drawJar();
-    this.drawTrajectory();
+    if (game.state !== 'attract') this.drawTray();
     for (const b of game.world.blobs) this.drawBody(b.px, b.py, b.n, b.level, b.cx, b.cy, b.r * b.scale, b.happy > 0);
-    this.drawHand();
+    this.drawAim();
     this.drawEffects();
     if (game.state !== 'attract') this.drawHud();
   }
@@ -63,32 +65,31 @@ export class Renderer {
     ctx.setLineDash([]); ctx.globalAlpha = 1;
   }
 
-  drawTrajectory() {
-    const { ctx, game } = this;
-    if (!game.hand || !game.aim || game.state !== 'play' || game.aimPower() < TAP_POWER) return;
-    const pull = game.aimPull(), p0 = game.handPos(), vx = pull.x * PULL_SPEED, vy = pull.y * PULL_SPEED;
-    ctx.fillStyle = LIGHT;
-    for (let tt = 0.04, k = 0; tt < 1.3; tt += 0.04, k++) {
-      const x = p0.x + vx * tt, y = p0.y + vy * tt + 0.5 * G * tt * tt;
-      if (x < WALL_L || x > WALL_R || y > FLOOR) break;
-      ctx.globalAlpha = Math.max(0, 0.55 - k * 0.018);
-      ctx.beginPath(); ctx.arc(x, y, 4 - k * 0.07, 0, Math.PI * 2); ctx.fill();
-    }
-    ctx.globalAlpha = 1;
+  /** The channel where the next blobs wait. */
+  drawTray() {
+    const ctx = this.ctx, pad = 7, h = TRAY_BOT - TRAY_TOP + pad * 2;
+    ctx.beginPath();
+    ctx.roundRect(TRAY_L - pad, TRAY_TOP - pad, TRAY_R - TRAY_L + pad * 2, h, h / 2);
+    ctx.fillStyle = theme.jar; ctx.fill();
+    ctx.lineWidth = 5; ctx.strokeStyle = 'rgba(255,255,255,.14)'; ctx.stroke();
   }
 
-  drawHand() {
-    const { ctx, game } = this;
-    if (!game.hand || (game.state !== 'play' && game.state !== 'paused')) return;
-    const hp = game.handPos(), pull = game.aimPull();
-    this.drawPreviewBlob(game.hand.level, hp.x, hp.y, game.hand.scale, pull);
-    if (game.aim && game.aimPower() >= TAP_POWER) {
-      const ex = hp.x + pull.x * 0.7, ey = hp.y + pull.y * 0.7;
-      ctx.lineCap = 'round'; ctx.strokeStyle = 'rgba(255,248,236,.9)'; ctx.lineWidth = 6;
-      ctx.beginPath(); ctx.moveTo(hp.x, hp.y); ctx.lineTo(ex, ey); ctx.stroke();
-      ctx.fillStyle = 'rgba(255,248,236,.55)';
-      ctx.beginPath(); ctx.arc(ex, ey, 13, 0, Math.PI * 2); ctx.fill();
-    }
+  /** White outline on the hovered/picked tray blob, and an arrow showing the launch. */
+  drawAim() {
+    const { ctx, game } = this, b = game.selected || game.hover;
+    if (!b || b.dead) return;
+    this.blobPath(b.px, b.py, b.n);
+    ctx.lineWidth = 5; ctx.lineJoin = 'round'; ctx.strokeStyle = LIGHT; ctx.stroke();
+    if (!game.selected || game.aimPower() < TAP_POWER) return;
+    const pull = game.aimPull(), d = Math.hypot(pull.x, pull.y);
+    const ux = pull.x / d, uy = pull.y / d, len = 24 + d * 0.75;
+    const ex = b.cx + ux * len, ey = b.cy + uy * len;
+    ctx.lineCap = 'round'; ctx.lineWidth = 7; ctx.strokeStyle = LIGHT;
+    ctx.beginPath(); ctx.moveTo(b.cx, b.cy); ctx.lineTo(ex, ey); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(ex - ux * 18 - uy * 13, ey - uy * 18 + ux * 13); ctx.lineTo(ex, ey);
+    ctx.lineTo(ex - ux * 18 + uy * 13, ey - uy * 18 - ux * 13);
+    ctx.stroke();
   }
 
   drawEffects() {
@@ -121,12 +122,10 @@ export class Renderer {
     ctx.textAlign = 'left'; ctx.fillStyle = ink;
     ctx.font = `900 52px ${FONT}`; ctx.fillText(Math.round(this.shownScore), WALL_L, 46);
     ctx.globalAlpha = 0.6; ctx.font = `800 20px ${FONT}`;
-    ctx.fillText(t('best') + ' ' + Math.max(save.best, game.score), WALL_L + 2, 88);
-    ctx.fillText(t('time') + ' ' + formatTime(game.time), WALL_L + 2, 116);
-
-    ctx.textAlign = 'center'; ctx.font = `800 18px ${FONT}`;
-    ctx.fillText(t('next'), 510, 80); ctx.globalAlpha = 1;
-    this.drawPreviewBlob(game.nextLevel, 510, 135, Math.min(1, 34 / radiusOf(game.nextLevel)), { x: 0, y: 0 });
+    ctx.fillText(t('best') + ' ' + Math.max(save.best, game.score), WALL_L + 2, 94);
+    ctx.textAlign = 'right';
+    ctx.fillText(t('time') + ' ' + formatTime(game.time), WALL_R, 94);
+    ctx.textAlign = 'center'; ctx.globalAlpha = 1;
 
     // Evolution chain under the jar
     let x = WALL_L + 14;
@@ -169,21 +168,5 @@ export class Renderer {
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillStyle = c[2] > 40 ? 'rgba(11,10,9,.82)' : LIGHT;
     ctx.fillText(label, cx, cy + size * 0.04);
-  }
-
-  /** Held / next blob: a wobbly circle stretched along the aim direction. */
-  drawPreviewBlob(level, x, y, scale, pull) {
-    const r = radiusOf(level) * scale, n = this.hx.length, clock = this.game.clock;
-    const d = Math.hypot(pull.x, pull.y), p = d / MAX_PULL;
-    const ux = d ? pull.x / d : 0, uy = d ? pull.y / d : 1;
-    const st = 1 + p * 0.35, sq = 1 - p * 0.18;
-    for (let i = 0; i < n; i++) {
-      const a = i / n * Math.PI * 2, wob = 1 + Math.sin(a * 3 + clock * 5) * 0.025;
-      const ox = Math.cos(a) * r * wob, oy = Math.sin(a) * r * wob;
-      const along = ox * ux + oy * uy, perp = -ox * uy + oy * ux;
-      this.hx[i] = x + ux * along * st - uy * perp * sq;
-      this.hy[i] = y + uy * along * st + ux * perp * sq;
-    }
-    this.drawBody(this.hx, this.hy, n, level, x, y, r, false);
   }
 }

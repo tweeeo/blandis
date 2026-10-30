@@ -1,7 +1,10 @@
 // Position-based soft-body solver. Each substep:
 //   integrate -> shape matching -> edge spacing + smoothing -> area (volume) -> bbox
 //   -> blob/blob collisions -> walls -> derive velocities.
-import { G, DAMP, K_SHAPE, K_EDGE, K_SMOOTH, K_AREA, WALL_L, WALL_R, FLOOR } from '../config.js';
+import {
+  G, DAMP, K_SHAPE, K_EDGE, K_SMOOTH, K_AREA, WALL_L, WALL_R, FLOOR,
+  TRAY_L, TRAY_R, TRAY_TOP, TRAY_BOT, TRAY_PUSH,
+} from '../config.js';
 
 const CORE = 0.45;     // core radius as a fraction of the blob radius
 const RESCUE = 3;      // px per substep to push out a swallowed blob
@@ -20,8 +23,12 @@ export class World {
   step(h) {
     const blobs = this.blobs;
     for (const b of blobs) {
+      // Tray blobs are pulled toward the middle of the channel (and lightly down onto its floor),
+      // easing off near the centre so they settle instead of jiggling.
+      const toMid = (TRAY_L + TRAY_R) / 2 - b.cx;
+      const gx = b.tray ? Math.sign(toMid) * TRAY_PUSH * Math.min(1, Math.abs(toMid) / 40) : 0, gy = b.tray ? 300 : G;
       for (let i = 0; i < b.n; i++) {
-        b.vy[i] += G * h;
+        b.vx[i] += gx * h; b.vy[i] += gy * h;
         b.ox[i] = b.px[i]; b.oy[i] = b.py[i];
         b.px[i] += b.vx[i] * h; b.py[i] += b.vy[i] * h;
         b.touch[i] = 0;
@@ -36,7 +43,7 @@ export class World {
         separateCores(a, b);
         if (pointsInto(a, b) | pointsInto(b, a)) {
           a.hit = b.hit = true;
-          if (a.level === b.level) this.contacts.push([a, b]);
+          if (a.level === b.level && !a.tray && !b.tray) this.contacts.push([a, b]);
         }
       }
     }
@@ -46,7 +53,8 @@ export class World {
       for (let i = 0; i < b.n; i++) {
         let vx = (b.px[i] - b.ox[i]) / h, vy = (b.py[i] - b.oy[i]) / h;
         const t = b.touch[i];
-        if (t === 1) vy *= 0.94; else if (t === 2) vx *= 0.9; else if (t === 3) { vx *= 0.995; vy *= 0.995; }
+        if (b.tray) { vx *= 0.985; vy *= 0.985; }   // settle quickly instead of sloshing
+        else if (t === 1) vy *= 0.94; else if (t === 2) vx *= 0.9; else if (t === 3) { vx *= 0.995; vy *= 0.995; }
         b.vx[i] = vx * DAMP; b.vy[i] = vy * DAMP; sx += vx; sy += vy;
       }
       b.vcx = sx / b.n; b.vcy = sy / b.n;
@@ -174,6 +182,14 @@ function pointsInto(a, b) {
 }
 
 function walls(b) {
+  if (b.tray) {
+    // Frictionless channel: blobs bigger than it get squashed into pills.
+    for (let i = 0; i < b.n; i++) {
+      if (b.px[i] < TRAY_L) b.px[i] = TRAY_L; else if (b.px[i] > TRAY_R) b.px[i] = TRAY_R;
+      if (b.py[i] < TRAY_TOP) b.py[i] = TRAY_TOP; else if (b.py[i] > TRAY_BOT) b.py[i] = TRAY_BOT;
+    }
+    return;
+  }
   for (let i = 0; i < b.n; i++) {
     if (b.px[i] < WALL_L) { b.px[i] = WALL_L; b.touch[i] = 1; b.hit = b.sideHit = true; }
     else if (b.px[i] > WALL_R) { b.px[i] = WALL_R; b.touch[i] = 1; b.hit = b.sideHit = true; }

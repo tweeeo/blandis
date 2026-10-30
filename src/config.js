@@ -1,7 +1,6 @@
 // World is a fixed 600x1000 logical space, scaled to fit the screen.
 export const W = 600, H = 1000;
 export const WALL_L = 24, WALL_R = 576, FLOOR = 948, JAR_TOP = 200, DANGER = 222;
-export const LAUNCH_X = 300, LAUNCH_Y = 118;
 
 // Simulation
 export const G = 1500;            // gravity, px/s²
@@ -14,9 +13,15 @@ export const K_SHAPE = 0.0015, K_EDGE = 0.3, K_SMOOTH = 0.025, K_AREA = 0.9;
 
 // Gameplay
 export const MAX_LEVEL = 10;                      // level 10 = 2048
+// Tray: a narrow channel above the jar where the next blobs wait, squashed in a row.
+// New blobs enter on the left and are pulled to the middle, so they are easy to aim from.
+export const TRAY_L = 40, TRAY_R = 560, TRAY_TOP = 140, TRAY_BOT = 184;
+export const TRAY_SIZE = 3;                       // max blobs waiting
+export const TRAY_PUSH = 900;                     // pull toward the tray centre, px/s²
+export const TRAY_SPAWN_DELAY = 0.35;
+// Launching: drag from a tray blob toward where it should go.
 export const MAX_PULL = 170, PULL_SPEED = 10.5;   // drag distance -> launch speed
-export const TAP_POWER = 0.04;                    // below this a drag is a gentle drop
-export const LAUNCH_COOLDOWN = 0.45;
+export const TAP_POWER = 0.04;                    // below this a release is a gentle drop
 export const COMBO_WINDOW = 1.0;
 export const DANGER_TIME = 3;
 // Relative chance of spawning 2, 4, 8, 16, 32, 64. 64 only appears once a 256 exists:

@@ -1,14 +1,14 @@
 # Blandis
 
-**Launch, squish and merge soft numbered blobs.** A free, satisfying physics puzzle game that runs in the browser — on desktop and mobile — with no install and no build step.
+**Pick, launch, squish and merge soft numbered blobs.** A free, satisfying physics puzzle game that runs in the browser — on desktop and mobile — with no install and no build step.
 
 ▶️ **Play: https://u0f.github.io/blandis/**
 
 ## How to play
 
-- **Drag** toward where you want the blob to go and **release**. The further you drag, the harder it flies.
-- **Quick tap** drops the blob gently.
-- Launch **softly** to place it without disturbing the pile, or **hard** to push others and squeeze into gaps.
+- Up to **3 blobs** wait squashed in the **tray** at the top; new ones slide in from the left and gather in the middle.
+- **Press** the one you want, **drag** toward where it should go (an arrow shows the shot) and **release**. The further you drag, the harder it flies.
+- A short tap drops it gently; a hard shot pushes others and squeezes into gaps.
 - Two **equal numbers** that touch merge into their double: 2 + 2 = 4, 4 + 4 = 8 … all the way to **2048**.
 - Back-to-back merges build a **combo** multiplier.
 - If any blob stays above the dashed line for **3 seconds**, the game is over.
@@ -125,6 +125,6 @@ Add a new entry to `STR` and `LANGS` in `src/i18n.js`, and an extra key to each 
 
 ## Español
 
-**Lanza, aplasta y fusiona números blanditos.** Juego de física gratuito para navegador (PC y móvil). Arrastra hacia donde quieras lanzar y suelta; dos números iguales que se tocan se fusionan en el doble hasta llegar a 2048. El idioma se cambia en **Settings → Language**.
+**Elige, lanza, aplasta y fusiona números blanditos.** Juego de física gratuito para navegador (PC y móvil). Elige uno de los blandis de la bandeja de arriba, arrastra hacia donde quieras lanzarlo y suelta; dos números iguales que se tocan se fusionan en el doble hasta llegar a 2048. El idioma se cambia en **Settings → Language**.
 
 Para probarlo en local hace falta un servidor estático (`npx serve .` o `python -m http.server 8080`). Para publicarlo, sube el repositorio a GitHub y en **Settings → Pages** elige **GitHub Actions** como origen.
