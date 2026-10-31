@@ -10,9 +10,7 @@
 <meta property="og:description" content="Pick, launch, squish and merge soft numbered blobs up to 2048.">
 <meta property="og:type" content="website">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="preload" href="fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/style.css">
 <script type="module" src="src/main.js"></script>
 </head>
@@ -22,8 +20,10 @@
   <button id="bMute"></button>
   <button id="bPause"></button>
 </div>
+<aside id="side" class="hide" aria-label="Global leaderboard"></aside>
 <div id="overlay"><div class="card" id="card"></div></div>
 <div id="toast" role="status" aria-live="polite"></div>
+<div id="update" class="hide" role="status" aria-live="polite"></div>
 <noscript>Blandis needs JavaScript to run.</noscript>
 </body>
 </html>

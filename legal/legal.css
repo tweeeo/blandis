@@ -1,0 +1,37 @@
+/* Legal pages: same look as the game's menu cards (see css/style.css). */
+@font-face { font-family:"Nunito"; font-style:normal; font-weight:600 900; font-display:swap;
+  src:url(../fonts/nunito-latin-ext.woff2) format("woff2");
+  unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family:"Nunito"; font-style:normal; font-weight:600 900; font-display:swap;
+  src:url(../fonts/nunito-latin.woff2) format("woff2");
+  unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
+:root { --ink:#5b4636; --card:#fbf6ee; --accent:#c8775a; --accent-dk:#9c5a42; --soft:#efe5d6; --soft-dk:#d8c8b0; }
+* { box-sizing:border-box; }
+body { margin:0; min-height:100vh; padding:24px 16px 40px; font-family:"Nunito",system-ui,sans-serif; font-weight:600;
+  background:linear-gradient(#1f1b18,#121010) fixed; color:var(--ink); line-height:1.55; }
+.card { background:var(--card); border-radius:28px; padding:26px 24px; max-width:760px; margin:0 auto;
+  box-shadow:0 10px 0 rgba(0,0,0,.12), 0 20px 50px rgba(0,0,0,.25); }
+.brand { display:inline-block; font-size:40px; font-weight:900; letter-spacing:-1px; color:var(--accent);
+  text-shadow:0 4px 0 var(--accent-dk); text-decoration:none; margin-bottom:6px; }
+h1 { font-size:28px; font-weight:900; margin:4px 0 2px; }
+h2 { font-size:20px; font-weight:900; margin:26px 0 8px; }
+h3 { font-size:16px; font-weight:900; margin:18px 0 6px; }
+.updated { margin:0 0 14px; opacity:.7; font-size:14px; }
+a { color:var(--accent-dk); font-weight:800; }
+nav { display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 4px; }
+nav a { text-decoration:none; padding:7px 12px; border-radius:12px; background:var(--soft); color:var(--ink);
+  box-shadow:0 3px 0 var(--soft-dk); font-size:14px; }
+nav a[aria-current="page"] { background:var(--accent); color:#fff; box-shadow:0 3px 0 var(--accent-dk); }
+.box { background:var(--soft); border-radius:16px; padding:12px 16px; margin:10px 0; }
+.box p { margin:4px 0; }
+table { width:100%; border-collapse:collapse; margin:8px 0; font-size:14px; }
+th, td { text-align:left; vertical-align:top; padding:8px 10px; border-bottom:2px solid var(--soft); }
+th { font-weight:900; }
+.table-wrap { overflow-x:auto; }
+mark.todo { background:#f2c46b; color:#6b4a1a; border-radius:6px; padding:0 5px; font-weight:800; }
+ul { padding-left:22px; }
+li { margin:3px 0; }
+.back { display:inline-block; margin-top:22px; padding:12px 20px; border-radius:18px; background:var(--accent); color:#fff;
+  text-decoration:none; font-weight:900; box-shadow:0 5px 0 var(--accent-dk); }
+@media (max-width:480px) { .card { padding:20px 16px; border-radius:22px; } .brand { font-size:34px; } }

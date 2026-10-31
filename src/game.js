@@ -35,11 +35,13 @@ export class Game {
     this.clock = 0;
     this.tampered = false;
     this.onOver = () => {};
+    this.onStart = () => {};
     this.reset();
   }
 
   get score() { return this.#score; }
   get time() { return this.#time; }
+  get merges() { return this.#run.merges; }
 
   #addScore(pts) {
     this.#verify();
@@ -75,7 +77,7 @@ export class Game {
     this.isNewBest = false; this.selected = null; this.grip = null; this.hover = null;
   }
 
-  start() { this.reset(); this.state = 'play'; this.#committed = false; }
+  start() { this.reset(); this.state = 'play'; this.#committed = false; this.onStart(); }
 
   /** A pile of blobs falling behind the main menu. */
   attract() {

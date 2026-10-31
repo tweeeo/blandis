@@ -11,3 +11,5 @@ desktop.ini
 
 # Local servers / deps
 node_modules/
+.wrangler/
+worker/

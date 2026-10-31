@@ -21,6 +21,7 @@
 - Best score, top-5 and run timer; 64s join the mix once you reach 256, so the jar gets tighter as you go.
 - Accidental reloads (F5, Ctrl+R, closing the tab) ask for confirmation during a run.
 - English and Spanish (Settings → Language).
+- Global top 50 leaderboard.
 - Mouse, touch and keyboard (`Esc` / `P` to pause).
 
 ## Run locally
@@ -65,6 +66,10 @@ For other static hosts (Netlify, Vercel, Cloudflare Pages, itch.io) you can uplo
 npx esbuild src/main.js --bundle --minify --format=iife --outfile=dist/game.js
 ```
 
+## Global leaderboard
+
+The global top runs on a small private backend that isn't part of this repository (and isn't covered by its license); `src/leaderboard.js` is the client. Each player gets an anonymous id in `localStorage` and keeps only their best run; the nickname is asked after the first game and can be changed in Settings.
+
 ## Anti-cheat
 
 Everything runs in the browser, so nothing is 100% cheat-proof — but casual console tricks don't work:
@@ -75,13 +80,15 @@ Everything runs in the browser, so nothing is 100% cheat-proof — but casual co
 - Flagged runs don't save scores, stats or achievements.
 - Save data in `localStorage` is signed; editing it by hand wipes progress instead of granting it.
 
-A real online leaderboard would still need server-side validation.
+Scores sent to the global leaderboard are validated again on the server.
 
 ## Project structure
 
 ```
 index.html              Page shell (canvas, overlay, buttons)
 css/style.css           Menu / HUD styles
+fonts/                  Self-hosted Nunito (SIL Open Font License)
+legal/                  Privacy, cookie, terms and about pages
 favicon.svg
 src/
   main.js               Entry point: wires everything and runs the fixed-timestep loop
@@ -97,6 +104,7 @@ src/
   themes.js             Color styles
   i18n.js               English / Spanish strings
   storage.js            Signed localStorage save data
+  leaderboard.js        Global leaderboard client
   ui/
     menu.js             Overlay menus and top-right buttons
     toast.js            Achievement pop-up
@@ -119,7 +127,13 @@ Add a new entry to `STR` and `LANGS` in `src/i18n.js`, and an extra key to each 
 
 ## License
 
-[MIT](LICENSE)
+Source-available under the [PolyForm Noncommercial License 1.0.0](LICENSE): you may use, study, modify and share the code for noncommercial purposes. Selling it or using it commercially is not allowed. Keep the `Required Notice` line from [LICENSE](LICENSE) (credit to the author) in any copy or derivative.
+
+The license covers this repository's code only. It does not give access to the official Blandis leaderboard server, its API, database or domains: forks must run their own backend and put its URL in a `LEADERBOARD_API` repository secret (read by the deploy workflow). The official server only answers the official game.
+
+The Nunito font in `fonts/` is licensed separately under the [SIL Open Font License 1.1](fonts/OFL.txt).
+
+Versions published before this license change were released under the MIT License.
 
 ---
 

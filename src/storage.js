@@ -10,7 +10,8 @@ const freshProgress = () => ({
   stats: { games: 0, merges: 0, launches: 0, playTime: 0 },
 });
 
-export const save = { ...freshProgress(), theme: 'clasico', muted: false, lang: 'en' };
+// name / pid: global leaderboard nickname and anonymous player id.
+export const save = { ...freshProgress(), theme: 'clasico', muted: false, lang: 'en', name: '', pid: '' };
 
 // cyrb53: small, fast 53-bit string hash.
 function hash(str) {
@@ -33,12 +34,15 @@ try {
       save.stats = { ...freshProgress().stats, ...raw.stats };
     } else {
       // Tampered: keep harmless settings only.
-      Object.assign(save, { theme: raw.theme, muted: !!raw.muted, lang: raw.lang });
+      Object.assign(save, { theme: raw.theme, muted: !!raw.muted, lang: raw.lang, name: raw.name, pid: raw.pid });
     }
   }
 } catch (e) { /* private mode or corrupt data */ }
 delete save.sig;
 if (save.lang !== 'es') save.lang = 'en';
+if (typeof save.name !== 'string') save.name = '';
+// The player id is only created when a score is first sent to the global leaderboard.
+if (!/^[0-9a-f]{32}$/.test(save.pid)) save.pid = '';
 
 export function persist() {
   try { localStorage.setItem(KEY, JSON.stringify({ ...save, sig: sign(save) })); } catch (e) { /* private mode */ }

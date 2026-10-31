@@ -1,3 +1,11 @@
+/* Nunito (variable, 600–900), self-hosted so no visitor data goes to a font CDN. License: fonts/OFL.txt */
+@font-face { font-family:"Nunito"; font-style:normal; font-weight:600 900; font-display:swap;
+  src:url(../fonts/nunito-latin-ext.woff2) format("woff2");
+  unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family:"Nunito"; font-style:normal; font-weight:600 900; font-display:swap;
+  src:url(../fonts/nunito-latin.woff2) format("woff2");
+  unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
 :root { --ink:#5b4636; --card:#fbf6ee; --accent:#c8775a; --accent-dk:#9c5a42; --soft:#efe5d6; --soft-dk:#d8c8b0; }
 * { box-sizing:border-box; }
 html, body { margin:0; height:100%; overflow:hidden; font-family:"Nunito",system-ui,sans-serif;
@@ -57,7 +65,67 @@ ol { text-align:left; margin:12px auto; padding-left:28px; max-width:220px; font
 .opt { font:inherit; font-weight:800; font-size:14px; padding:8px 12px; border-radius:12px; border:0; cursor:pointer; background:transparent; color:var(--ink); }
 .opt.on { background:var(--accent); color:#fff; }
 
+.card input { flex:1; min-width:0; font:inherit; font-weight:800; font-size:15px; padding:8px 12px; border-radius:12px;
+  border:2px solid var(--soft-dk); background:#fff; color:var(--ink); user-select:text; -webkit-user-select:text; }
+.card input:focus { outline:none; border-color:var(--accent); }
+.card input.bad { border-color:#c0392b; }
+.sub .opt { margin-left:6px; }
+.note { margin:4px 0 10px; font-size:12px; font-weight:600; opacity:.75; line-height:1.4; }
+.legal { margin:14px 0 0; font-size:12px; font-weight:700; opacity:.6; }
+.note a, .legal a, .check a { color:inherit; }
+.shareText { display:block; width:100%; min-height:84px; margin:10px 0; padding:10px 12px; resize:none; border-radius:14px;
+  border:2px solid var(--soft-dk); background:#fff; color:var(--ink); font:inherit; font-weight:700; font-size:14px;
+  user-select:text; -webkit-user-select:text; }
+.check { display:flex; gap:8px; align-items:flex-start; text-align:left; margin:2px 0 6px; padding:6px 8px; border-radius:12px;
+  font-size:13px; font-weight:700; line-height:1.4; cursor:pointer; }
+.check input { flex:none; width:18px; height:18px; margin:1px 0 0; padding:0; accent-color:var(--accent); }
+.check.bad { background:#f7d9cf; color:#8a2e1a; }
+
+/* Global leaderboard */
+ol.lb { max-width:none; padding-left:34px; }
+ol.lb li { padding:3px 0; overflow-wrap:anywhere; }
+ol.lb li b { float:right; margin-left:10px; }
+ol.lb li.me { color:var(--accent); }
+
 .help { text-align:left; font-weight:600; line-height:1.5; padding-left:20px; }
+
+/* Live leaderboard beside the jar (wide screens only; placed by src/ui/sidebar.js) */
+#side { position:fixed; width:260px; z-index:6; pointer-events:none; background:var(--card); color:var(--ink);
+  border-radius:24px; padding:16px 14px 14px; box-shadow:0 8px 0 rgba(0,0,0,.12), 0 18px 40px rgba(0,0,0,.25); }
+#side.hide { display:none; }
+#side h3 { margin:0 0 10px; font-size:18px; font-weight:900; text-align:center; }
+.lbs-view { position:relative; overflow:hidden; border-radius:14px; }
+.lbs-view.up { mask-image:linear-gradient(transparent, #000 12%); -webkit-mask-image:linear-gradient(transparent, #000 12%); }
+.lbs-view.down { mask-image:linear-gradient(#000 88%, transparent); -webkit-mask-image:linear-gradient(#000 88%, transparent); }
+.lbs-view.up.down { mask-image:linear-gradient(transparent, #000 12%, #000 88%, transparent); -webkit-mask-image:linear-gradient(transparent, #000 12%, #000 88%, transparent); }
+.lbs-list { position:absolute; inset:0; transition:transform .6s cubic-bezier(.3,1.2,.5,1); }
+.lbs-row { position:absolute; left:0; right:0; height:30px; margin:2px 0; padding:0 10px; display:flex; align-items:center; gap:8px;
+  border-radius:10px; font-weight:800; font-size:14px; transition:transform .6s cubic-bezier(.3,1.4,.5,1); }
+.lbs-row i { font-style:normal; width:26px; opacity:.55; font-size:12px; }
+.lbs-row span { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.lbs-row.own span { color:var(--accent); }
+.lbs-row.me { background:var(--accent); color:#fff; z-index:1; box-shadow:0 3px 0 var(--accent-dk); }
+.lbs-row.me i { opacity:.9; }
+.lbs-row.me::after { content:attr(data-up); position:absolute; right:64px; top:6px; padding:1px 7px; border-radius:99px;
+  background:#f2c46b; color:#6b4a1a; font-size:12px; font-weight:900; opacity:0; }
+.lbs-row.me.up { animation:lbsUp .7s cubic-bezier(.3,1.6,.5,1); }
+.lbs-row.me.up::after { animation:lbsBadge 1.2s ease-out; }
+.lbs-row.passed { animation:lbsPassed .7s ease-out; }
+@keyframes lbsUp { 30% { scale:1.08; box-shadow:0 3px 0 var(--accent-dk), 0 0 0 6px rgba(242,196,107,.55); } }
+@keyframes lbsBadge { 0% { opacity:0; translate:0 6px; } 20% { opacity:1; translate:0 -4px; } 80% { opacity:1; } 100% { opacity:0; translate:0 -14px; } }
+@keyframes lbsPassed { 0% { background:#f7d9cf; } 100% { background:transparent; } }
+.lbs-foot { margin-top:10px; text-align:center; font-size:13px; font-weight:700; min-height:18px; }
+.lbs-foot small { font-size:13px; opacity:.85; }
+.lbs-bar { height:8px; margin-top:6px; border-radius:99px; background:var(--soft); overflow:hidden; }
+.lbs-bar i { display:block; height:100%; background:var(--accent); border-radius:99px; transform-origin:left; transition:transform .3s; }
+
+/* "New version" notice (src/update.js) */
+#update { position:fixed; left:50%; bottom:16px; transform:translateX(-50%); z-index:9; display:flex; align-items:center; gap:10px;
+  background:var(--card); color:var(--ink); padding:10px 10px 10px 16px; border-radius:18px; font-weight:800; font-size:14px;
+  box-shadow:0 6px 0 rgba(0,0,0,.12), 0 12px 30px rgba(0,0,0,.25); max-width:calc(100vw - 32px); }
+#update.hide { display:none; }
+#update button { font:inherit; font-weight:900; border:0; border-radius:12px; padding:8px 12px; background:var(--accent); color:#fff;
+  cursor:pointer; box-shadow:0 3px 0 var(--accent-dk); white-space:nowrap; }
 
 /* Achievement toast */
 #toast { position:fixed; left:50%; top:16px; transform:translate(-50%,-140%); background:var(--card); color:var(--ink);
@@ -67,5 +135,5 @@ ol { text-align:left; margin:12px auto; padding-left:28px; max-width:220px; font
 #toast small { display:block; font-weight:600; opacity:.75; }
 
 @media (prefers-reduced-motion: reduce) {
-  .card, #toast { animation:none; transition:none; }
+  .card, #toast, .lbs-list, .lbs-row, .lbs-row::after { animation:none; transition:none; }
 }

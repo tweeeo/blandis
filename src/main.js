@@ -3,15 +3,20 @@ import { DT } from './config.js';
 import { Game } from './game.js';
 import { Renderer } from './render.js';
 import { Menu } from './ui/menu.js';
+import { Sidebar } from './ui/sidebar.js';
 import { applyTheme } from './themes.js';
 import { isThemeUnlocked } from './achievements.js';
 import { save } from './storage.js';
 import { unlockAudio } from './audio.js';
+import './update.js';
 
 const canvas = document.getElementById('c');
 const game = new Game();
 const renderer = new Renderer(canvas, game);
 const menu = new Menu(game);
+const sidebar = new Sidebar(game, renderer);
+game.onStart = () => sidebar.refresh();
+sidebar.refresh();
 
 // Input: press on a blob in the tray, drag toward where it should go, release to launch.
 const worldPoint = e => renderer.toWorld(e.clientX, e.clientY);
@@ -28,7 +33,7 @@ canvas.addEventListener('pointermove', e => {
 canvas.addEventListener('pointerup', e => game.releaseAim(worldPoint(e), e.pointerId));
 canvas.addEventListener('pointercancel', () => game.cancelAim());
 addEventListener('keydown', e => {
-  if (e.key === 'Escape' || e.key === 'p') menu.togglePause();
+  if ((e.key === 'Escape' || e.key === 'p') && e.target.tagName !== 'INPUT') menu.togglePause();
   // F5 / Ctrl+R / Cmd+R would throw away the run without asking.
   if (e.key === 'F5' || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'r')) e.preventDefault();
 });
@@ -54,6 +59,7 @@ function frame(now) {
   }
   game.fx.update(dt);
   renderer.draw();
+  sidebar.update();
   raf(frame);
 }
 
@@ -64,4 +70,4 @@ menu.show('start');
 raf(frame);
 
 // Nothing is exposed globally in production. For local debugging only:
-if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') window.blandis = { game, renderer, menu };
+if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') window.blandis = { game, renderer, menu, sidebar };
