@@ -39,6 +39,9 @@ export class World {
       const a = blobs[i];
       for (let j = i + 1; j < blobs.length; j++) {
         const b = blobs[j];
+        // Tray and jar blobs pass through each other: otherwise the pinned tray acts as a shelf
+        // that a blob flung upward can land on, stuck above the danger line.
+        if (a.tray !== b.tray) continue;
         if (a.maxX < b.minX || b.maxX < a.minX || a.maxY < b.minY || b.maxY < a.minY) continue;
         separateCores(a, b);
         if (pointsInto(a, b) | pointsInto(b, a)) {
