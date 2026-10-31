@@ -2,6 +2,7 @@
 // Progress (best, top, achievements, stats) is signed so hand-editing localStorage
 // from the dev tools wipes progress instead of granting it. This is a deterrent, not
 // real security: a game that runs entirely in the browser can always be modified.
+// The leaderboard server trusts none of it: it only gets the finished run and checks it itself.
 const KEY = 'blandis-v2';
 const SALT = 'squ1shy-bl0bs:7f3a9c';
 

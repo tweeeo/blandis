@@ -45,7 +45,8 @@
   <p><b>Legal basis:</b> the processing is necessary to provide the leaderboard that you ask to join under the <a href="terms.html">Terms</a> (Article 6(1)(b) GDPR). Only the data needed for that purpose is processed.</p>
 
   <h3>2.2 Abuse prevention (IP address)</h3>
-  <p>When a game is sent, the server stores your IP address with the time of the request, to accept only one submission every 10 seconds from the same address. The IP address is not linked to your nickname, identifier or score.</p>
+  <p>When a game is sent, the server stores your IP address (for IPv6, only its first half, which identifies your network) with the time of the request, to accept only one submission every 10 seconds from the same address. To limit how many new leaderboard entries can come from one address, it also keeps a code derived from your IP address (a keyed hash, from which the address can't be read back) with a count of new entries made from it in the last 24 hours. Neither is linked to your nickname, identifier or score.</p>
+  <p>When a game starts, the game asks the server for a signed code with the start time, and sends it back with the score. The server stores nothing when it hands out the code; once it has been used, only the code itself is kept, to refuse it a second time.</p>
   <p><b>Legal basis:</b> legitimate interest in protecting the leaderboard against spam and automated abuse (Article 6(1)(f) GDPR).</p>
   <p>The server also checks every score automatically and rejects results that a real game cannot produce. This only decides whether a score enters the leaderboard; it has no legal or similarly significant effect on you.</p>
 
@@ -60,6 +61,8 @@
   <ul>
     <li><b>Leaderboard entry:</b> until you delete it, or automatically 12 months after the last game you sent, whichever comes first. The server checks this every hour.</li>
     <li><b>IP address for abuse prevention:</b> deleted after the 10-second window; an automatic clean-up runs every hour, so it is kept for about one hour at most.</li>
+    <li><b>Code derived from the IP address and its count of new entries:</b> deleted 24 hours after the first new entry from that address (clean-up every hour).</li>
+    <li><b>Used game codes:</b> deleted 12 hours after they were handed out (clean-up every hour).</li>
     <li><b>Data on your device:</b> until you clear your browser's site data.</li>
   </ul>
   <p>Request logging (Workers Logs) is turned off for the leaderboard server. The providers in section 4 may keep their own technical logs under their own policies.</p>

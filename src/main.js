@@ -8,6 +8,7 @@ import { applyTheme } from './themes.js';
 import { isThemeUnlocked } from './achievements.js';
 import { save } from './storage.js';
 import { unlockAudio } from './audio.js';
+import { startSession } from './leaderboard.js';
 import './update.js';
 
 const canvas = document.getElementById('c');
@@ -15,7 +16,7 @@ const game = new Game();
 const renderer = new Renderer(canvas, game);
 const menu = new Menu(game);
 const sidebar = new Sidebar(game, renderer);
-game.onStart = () => sidebar.refresh();
+game.onStart = () => { startSession(); sidebar.refresh(); };
 sidebar.refresh();
 
 // Input: press on a blob in the tray, drag toward where it should go, release to launch.

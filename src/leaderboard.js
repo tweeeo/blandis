@@ -16,16 +16,23 @@ async function call(init) {
 }
 const send = (method, data) => call({ method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
 
-/** Top 50: [{ name, score, time }]. */
-export const fetchTop = () => call();
+/** Top 50: [{ name, score, time }], coerced so a bad response can't put markup in the numbers. */
+export const fetchTop = () => call().then(rows => rows.map(r => ({ name: String(r.name), score: Number(r.score) | 0, time: Number(r.time) || 0 })));
+
+// A token from the server dated at the start of the run: it lets the server check that the run
+// took at least as long as it says. Without one (offline at the start) the score is rejected.
+let session = null;
+export function startSession() {
+  session = fetch(API + '/session', { method: 'POST' }).then(r => r.json()).then(d => d.token, () => null);
+}
 
 /** Sends a finished run; resolves to { rank } of the player's best run. */
-export function submitScore(score, time, merges) {
+export async function submitScore(score, time, merges) {
   if (!save.pid) {
     save.pid = Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join('');
     persist();
   }
-  return send('POST', { id: save.pid, name: save.name, score, time, merges });
+  return send('POST', { id: save.pid, name: save.name, score, time, merges, token: await session });
 }
 
 /** Erases this player's entry on the server, then forgets the id and nickname locally. */
