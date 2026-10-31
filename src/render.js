@@ -3,7 +3,7 @@ import {
   W, H, WALL_L, WALL_R, FLOOR, JAR_TOP, DANGER, MAX_LEVEL, DANGER_TIME, TAP_POWER,
   TRAY_L, TRAY_R, TRAY_TOP, TRAY_BOT, valueOf,
 } from './config.js';
-import { theme, hsl } from './themes.js';
+import { theme, hsl, jarImg } from './themes.js';
 import { save } from './storage.js';
 import { t, formatTime } from './i18n.js';
 
@@ -52,9 +52,17 @@ export class Renderer {
 
   drawJar() {
     const { ctx, game } = this;
+    const x = WALL_L - 8, y = JAR_TOP, w = WALL_R - WALL_L + 16, h = FLOOR - JAR_TOP + 8;
     ctx.beginPath();
-    ctx.roundRect(WALL_L - 8, JAR_TOP, WALL_R - WALL_L + 16, FLOOR - JAR_TOP + 8, 28);
+    ctx.roundRect(x, y, w, h, 28);
     ctx.fillStyle = theme.jar; ctx.fill();
+    if (jarImg?.naturalWidth) {
+      // Custom background, scaled to cover the jar and clipped to its shape.
+      const iw = jarImg.naturalWidth, ih = jarImg.naturalHeight, k = Math.max(w / iw, h / ih);
+      ctx.save(); ctx.clip();
+      ctx.drawImage(jarImg, x + (w - iw * k) / 2, y + (h - ih * k) / 2, iw * k, ih * k);
+      ctx.restore();
+    }
     ctx.lineWidth = 7; ctx.strokeStyle = 'rgba(255,255,255,.14)'; ctx.stroke();
 
     const warn = game.dangerT > 0;

@@ -51,6 +51,7 @@ export const ACHIEVEMENTS = [
   // Extras
   A('polyglot', '🌍', 'Polyglot', 'Políglota', 'Change the language', 'Cambia el idioma'),
   A('fashion', '🎨', 'Fashionista', 'Con estilo', 'Switch to another color style', 'Cambia a otro estilo de color'),
+  A('wallpaper', '🖼️', 'Interior Designer', 'Decorador de interiores', 'Set a custom background', 'Pon un fondo personalizado'),
   A('collector', '📦', 'Collector', 'Coleccionista', 'Unlock 20 achievements', 'Desbloquea 20 logros'),
   A('complete', '💎', 'Completionist', 'Completista', 'Unlock every other achievement', 'Desbloquea todos los demás logros'),
 ];

@@ -34,3 +34,14 @@ export function applyTheme() {
   theme = THEMES[save.theme];
   document.body.style.background = `linear-gradient(${theme.bg[0]},${theme.bg[1]})`;
 }
+
+// Custom image drawn inside the jar (see Renderer#drawJar).
+const loadImg = url => { if (!url) return null; const img = new Image(); img.src = url; return img; };
+export let jarImg = loadImg(save.bg);
+
+/** `url` is an http(s) href already checked to load (or '' to remove it). */
+export function setBg(url) {
+  save.bg = url;
+  persist();
+  jarImg = loadImg(url);
+}

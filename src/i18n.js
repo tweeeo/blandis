@@ -18,6 +18,7 @@ const STR = {
     you: 'You', first: "You're #1! 👑", nextUp: (name, pts) => `Next: <b>${name}</b> · ${pts} to go`,
     privacy: 'Privacy', privacyPolicy: 'Privacy policy', terms: 'Terms', about: 'About',
     joinTerms: (terms, privacy) => `I'm 14 or older and I accept the ${terms} and the ${privacy} of the global top.`,
+    bgUrl: 'Background image URL', apply: 'Apply', bgDel: 'Remove background', bgError: "Couldn't load that image.",
     delMine: 'Delete my global score', delConfirm: 'Tap again to delete it', deleted: 'Your global score has been deleted.',
     helpList: [
       'Up to 3 blobs wait in the tray at the top. Press the one you want to use.',
@@ -46,6 +47,7 @@ const STR = {
     you: 'Tú', first: '¡Vas el #1! 👑', nextUp: (name, pts) => `Siguiente: <b>${name}</b> · faltan ${pts}`,
     privacy: 'Privacidad', privacyPolicy: 'Política de privacidad', terms: 'Términos', about: 'Acerca de',
     joinTerms: (terms, privacy) => `Tengo 14 años o más y acepto los ${terms} y la ${privacy} del top mundial.`,
+    bgUrl: 'URL de imagen de fondo', apply: 'Aplicar', bgDel: 'Borrar fondo', bgError: 'No se pudo cargar esa imagen.',
     delMine: 'Borrar mi puntuación mundial', delConfirm: 'Pulsa otra vez para borrarla', deleted: 'Tu puntuación mundial se ha borrado.',
     helpList: [
       'Hasta 3 blandis esperan en la bandeja de arriba. Pulsa el que quieras usar.',

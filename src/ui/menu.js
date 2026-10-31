@@ -1,7 +1,7 @@
 // Overlay menus (start, pause, game over, settings, styles, achievements, help) + top-right buttons.
 import { save, persist } from '../storage.js';
 import { t, tx, setLang, LANGS, formatTime } from '../i18n.js';
-import { THEMES, hsl, setTheme } from '../themes.js';
+import { THEMES, hsl, setTheme, setBg } from '../themes.js';
 import { ACHIEVEMENTS, isThemeUnlocked, unlock, unlockedCount } from '../achievements.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { fetchTop, submitScore, deleteScore, NAME_RE } from '../leaderboard.js';
@@ -29,7 +29,7 @@ export class Menu {
     this.btnPause.onclick = () => { unlockAudio(); sfx.click(); this.togglePause(); };
     this.btnMute.onclick = () => { save.muted = !save.muted; persist(); this.refreshButtons(); unlockAudio(); sfx.click(); };
     // Nickname inputs: Enter sends from the game-over screen, settings saves on change.
-    this.overlay.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'lbName') this.sendName(); });
+    this.overlay.addEventListener('keydown', e => { if (e.key === 'Enter') { if (e.target.id === 'lbName') this.sendName(); if (e.target.id === 'bgUrl') this.applyBg(); } });
     this.overlay.addEventListener('change', e => {
       if (e.target.id !== 'nameSet') return;
       const n = e.target.value.trim();
@@ -77,6 +77,18 @@ export class Menu {
     if (!NAME_RE.test(n)) { input.classList.add('bad'); input.focus(); return; }
     if (!ok.checked) { ok.parentElement.classList.add('bad'); return; }
     save.name = n; persist(); this.send();
+  }
+
+  /** Custom background: only applied (and saved) once the image actually loads. */
+  applyBg() {
+    const input = document.getElementById('bgUrl');
+    let url;
+    try { url = new URL(input.value.trim()); } catch (e) { /* not a URL */ }
+    if (!url || !/^https?:$/.test(url.protocol)) { input.classList.add('bad'); input.focus(); return; }
+    const img = new Image(), done = () => { if (this.screen === 'settings') this.show('settings', false); };
+    img.onload = () => { this.bgErr = ''; setBg(url.href); unlock('wallpaper'); done(); };
+    img.onerror = () => { this.bgErr = input.value; done(); };
+    img.src = url.href;
   }
 
   lbLine() {
@@ -163,6 +175,10 @@ export class Menu {
           <p class="note">${t('publicNote')} ${legalLink('privacy', t('privacy'))}</p>
           ${save.pid ? btn('delMine', `🗑 ${this.confirmDel ? t('delConfirm') : t('delMine')}`) : ''}
           ${this.delMsg ? `<p class="note">${this.delMsg}</p>` : ''}
+          <div class="row"><input id="bgUrl" type="url" value="${esc(this.bgErr || save.bg)}" placeholder="${t('bgUrl')}" autocomplete="off">
+            <button class="opt on" data-a="bgSet">${t('apply')}</button></div>
+          ${this.bgErr ? `<p class="warn">${t('bgError')}</p>` : ''}
+          ${save.bg ? btn('bgDel', `🗑 ${t('bgDel')}`) : ''}
           ${btn('styles', t('styles'))}${back}`;
       case 'styles':
         return `<h2>${t('styles')}</h2><div class="grid">${Object.entries(THEMES).map(([id, th]) => {
@@ -194,6 +210,7 @@ export class Menu {
     unlockAudio(); sfx.click();
     const g = this.game, a = el.dataset.a, v = el.dataset.v;
     if (a !== 'delMine') { this.confirmDel = false; this.delMsg = ''; }
+    this.bgErr = '';
     switch (a) {
       case 'delMine':
         if (!this.confirmDel) { this.confirmDel = true; this.show('settings', false); break; }
@@ -201,6 +218,8 @@ export class Menu {
         deleteScore().then(() => { this.delMsg = t('deleted'); }, () => { this.delMsg = t('lbError'); })
           .then(() => { if (this.screen === 'settings') this.show('settings', false); });
         break;
+      case 'bgSet': this.applyBg(); break;
+      case 'bgDel': setBg(''); this.show('settings', false); break;
       case 'play': g.start(); this.hide(); break;
       case 'resume': g.resume(); this.hide(); break;
       case 'menu': g.attract(); this.show('start'); break;
