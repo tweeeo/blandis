@@ -80,7 +80,7 @@ export class Renderer {
     if (!b || b.dead) return;
     this.blobPath(b.px, b.py, b.n);
     ctx.lineWidth = 5; ctx.lineJoin = 'round'; ctx.strokeStyle = LIGHT; ctx.stroke();
-    if (!game.selected || game.aimPower() < TAP_POWER) return;
+    if (!game.selected || game.aimPower() < TAP_POWER || game.aimCancelled) return;
     const pull = game.aimPull(), d = Math.hypot(pull.x, pull.y);
     const ux = pull.x / d, uy = pull.y / d, len = 24 + d * 0.75;
     const ex = b.cx + ux * len, ey = b.cy + uy * len;

@@ -22,6 +22,7 @@ export const TRAY_SPAWN_DELAY = 0.35;
 // Launching: drag from a tray blob toward where it should go.
 export const MAX_PULL = 170, PULL_SPEED = 10.5;   // drag distance -> launch speed
 export const TAP_POWER = 0.04;                    // below this a release is a gentle drop
+export const CANCEL_POWER = 0.12;                 // dragged past this and back under it: release cancels
 export const COMBO_WINDOW = 1.0;
 export const DANGER_TIME = 3;
 // Relative chance of spawning 2, 4, 8, 16, 32, 64. 64 only appears once a 256 exists:

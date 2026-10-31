@@ -1,6 +1,6 @@
 // Game rules and state machine. Knows nothing about the DOM or canvas.
 import {
-  WALL_L, WALL_R, DANGER, SUB, MAX_LEVEL, MAX_PULL, PULL_SPEED, TAP_POWER,
+  WALL_L, WALL_R, DANGER, SUB, MAX_LEVEL, MAX_PULL, PULL_SPEED, TAP_POWER, CANCEL_POWER,
   TRAY_L, TRAY_R, TRAY_TOP, TRAY_BOT, TRAY_SIZE, TRAY_SPAWN_DELAY,
   COMBO_WINDOW, DANGER_TIME, radiusOf, valueOf, randomSpawnLevel,
 } from './config.js';
@@ -163,12 +163,18 @@ export class Game {
     this.grip = { x0: p.x, y0: p.y, x: p.x, y: p.y, id };
     sfx.click();
   }
-  moveAim(p, id) { if (this.grip && this.grip.id === id) { this.grip.x = p.x; this.grip.y = p.y; } }
+  moveAim(p, id) {
+    if (!this.grip || this.grip.id !== id) return;
+    this.grip.x = p.x; this.grip.y = p.y;
+    if (this.aimPower() >= CANCEL_POWER) this.grip.armed = true;
+  }
   releaseAim(p, id) {
     if (!this.grip || this.grip.id !== id) return;
     this.moveAim(p, id);
-    this.#launch();
+    if (this.aimCancelled) this.cancelAim(); else this.#launch();
   }
+  /** Arrow was pulled out and brought back to the blob: releasing now puts it back. */
+  get aimCancelled() { return !!this.grip?.armed && this.aimPower() < CANCEL_POWER; }
   cancelAim() { this.selected = null; this.grip = null; }
 
   /** Drag vector from the press point, clamped to MAX_PULL: the launch direction and strength. */
