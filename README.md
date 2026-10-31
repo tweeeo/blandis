@@ -2,7 +2,7 @@
 
 **Pick, launch, squish and merge soft numbered blobs.** A free, satisfying physics puzzle game that runs in the browser — on desktop and mobile — with no install and no build step.
 
-▶️ **Play: https://u0f.github.io/blandis/**
+▶️ **Play: https://blandis.u0f.es/**
 
 ## How to play
 
