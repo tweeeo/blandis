@@ -158,7 +158,7 @@ export class Menu {
 
     switch (screen) {
       case 'start':
-        return `<h1>Blandis</h1><p class="sub">${t('tagline')}</p>
+        return `<p class="logo">Blandis</p><p class="sub">${t('tagline')}</p>
           ${btn('modes', t('play'), false)}${lbBtn}${achBtn}${btn('settings', t('settings'))}${btn('help', t('help'))}
           ${save.best ? best : ''}
           <p class="legal">${guideLink(t('guide'))} · ${legalLink('privacy', t('privacy'))} · ${legalLink('cookies', 'Cookies')} · ${legalLink('terms', t('terms'))} · ${legalLink('about', t('about'))}</p>`;

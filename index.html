@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Blandis – Squishy Physics Merge Puzzle, Free in Your Browser</title>
 <meta name="description" content="Pick, launch and squish soft numbered blobs so equal numbers merge up to 2048. A free physics puzzle game for mobile and desktop browsers: no install, no ads.">
 <link rel="canonical" href="https://blandis.u0f.es/">
@@ -58,7 +58,11 @@
 <script type="module" src="src/main.js"></script>
 </head>
 <body>
-<canvas id="c">Blandis is a physics puzzle game: launch soft numbered blobs into the jar and merge equal numbers up to 2048. <a href="how-to-play.html">How to play</a></canvas>
+<header class="sr-only">
+  <h1>Blandis: squishy physics merge puzzle</h1>
+  <p>Blandis is a free physics puzzle game you play in your browser, on mobile or desktop. Pick a soft numbered blob, launch it into the jar and squish equal numbers together so they merge, all the way up to 2048. No install, no ads.</p>
+</header>
+<canvas id="c"></canvas>
 <div id="btns">
   <button id="bMute"></button>
   <button id="bPause"></button>

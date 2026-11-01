@@ -8,7 +8,7 @@ const SALT = 'squ1shy-bl0bs:7f3a9c';
 
 const freshProgress = () => ({
   best: 0, top: [], ach: [],
-  stats: { games: 0, merges: 0, launches: 0, playTime: 0 },
+  stats: { games: 0, merges: 0, launches: 0, playTime: 0, played: [] },   // played: modes with a finished run
 });
 
 // name / pid: global leaderboard nickname and anonymous player id.

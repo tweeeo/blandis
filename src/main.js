@@ -11,6 +11,7 @@ import { unlockAudio } from './audio.js';
 import { startSession } from './leaderboard.js';
 import './update.js';
 
+const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 const canvas = document.getElementById('c');
 const game = new Game();
 const renderer = new Renderer(canvas, game);
@@ -33,10 +34,17 @@ canvas.addEventListener('pointermove', e => {
 });
 canvas.addEventListener('pointerup', e => game.releaseAim(worldPoint(e), e.pointerId));
 canvas.addEventListener('pointercancel', () => game.cancelAim());
+// Capture lost without a pointerup (fires after pointerup too, by then the grip is already gone).
+// Otherwise a stale grip would launch on the next click's release, since the mouse always has the same pointerId.
+canvas.addEventListener('lostpointercapture', () => game.cancelAim());
 addEventListener('keydown', e => {
   if ((e.key === 'Escape' || e.key === 'p') && e.target.tagName !== 'INPUT') menu.togglePause();
+  if (e.key.toLowerCase() === 'c' && e.target.tagName !== 'INPUT') game.cancelAim();
   // F5 / Ctrl+R / Cmd+R would throw away the run without asking.
   if (e.key === 'F5' || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'r')) e.preventDefault();
+  // DevTools / view-source shortcuts. Only a deterrent: the browser menu still opens them (and Firefox ignores this).
+  const k = e.key.toLowerCase(), mod = e.ctrlKey || e.metaKey;
+  if (!isLocal && (e.key === 'F12' || (mod && (e.shiftKey || e.altKey) && 'ijc'.includes(k)) || (mod && k === 'u'))) e.preventDefault();
 });
 addEventListener('contextmenu', e => e.preventDefault());
 // Reload button, closing the tab, etc.: the browser shows its own "Leave site?" confirmation.
@@ -71,4 +79,4 @@ menu.show('start');
 raf(frame);
 
 // Nothing is exposed globally in production. For local debugging only:
-if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') window.blandis = { game, renderer, menu, sidebar };
+if (isLocal) window.blandis = { game, renderer, menu, sidebar };

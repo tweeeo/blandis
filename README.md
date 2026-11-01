@@ -17,11 +17,11 @@
 
 - Real soft-body physics: every blob is a squishy ring that keeps its volume and deforms to fill the gaps around it.
 - Juicy feedback: squish waves, particles, screen shake, synthesized sound effects and haptics on mobile.
-- 35 achievements to collect (merges, score, combos, skill shots, survival, lifetime stats…); 7 of them unlock color styles (Cozy, Neon, Cloud, Ocean, Caramel, Night, Rainbow).
+- 74 achievements to collect (merges, score, combos, skill shots, survival, lifetime stats, per-mode challenges…); 7 of them unlock color styles (Cozy, Neon, Cloud, Ocean, Caramel, Night, Rainbow).
 - Best score, top-5 and run timer; 64s join the mix once you reach 256, so the jar gets tighter as you go.
 - Accidental reloads (F5, Ctrl+R, closing the tab) ask for confirmation during a run.
 - English and Spanish (Settings → Language).
-- Global top 50 leaderboard.
+- Global top 10 leaderboard for each game mode.
 - Mouse, touch and keyboard (`Esc` / `P` to pause).
 
 ## Run locally

@@ -1,10 +1,10 @@
 // Draws the game onto the canvas. Reads game state, never changes it.
 import {
-  W, H, WALL_L, WALL_R, FLOOR, JAR_TOP, DANGER, MAX_LEVEL, DANGER_TIME, TAP_POWER,
+  W, H, WALL_L, WALL_R, FLOOR, JAR_TOP, DANGER, MAX_LEVEL, DANGER_TIME,
   TRAY_L, TRAY_R, TRAY_TOP, TRAY_BOT, valueOf,
 } from './config.js';
 import { theme, hsl, jarImg } from './themes.js';
-import { t, formatTime } from './i18n.js';
+import { t, tx, formatTime } from './i18n.js';
 import { record, formatResult } from './modes.js';
 
 const LINE = '#0b0a09';
@@ -87,11 +87,14 @@ export class Renderer {
     const { ctx, game } = this, b = game.selected || game.hover;
     if (!b || b.dead) return;
     this.blobPath(b.px, b.py, b.n);
+    // Dimmed outline: releasing now puts the blob back.
+    ctx.globalAlpha = game.aimCancelled ? 0.35 : 1;
     ctx.lineWidth = 5; ctx.lineJoin = 'round'; ctx.strokeStyle = LIGHT; ctx.stroke();
-    if (!game.selected || game.aimPower() < TAP_POWER || game.aimCancelled) return;
+    ctx.globalAlpha = 1;
+    // No arrow until the drag is past the cancel zone, so "arrow gone" always means "release cancels".
+    if (!game.grip?.armed || game.aimCancelled) return;
     const pull = game.aimPull(), d = Math.hypot(pull.x, pull.y);
-    const ux = pull.x / d, uy = pull.y / d, len = 24 + d * 0.75;
-    const ex = b.cx + ux * len, ey = b.cy + uy * len;
+    const ux = pull.x / d, uy = pull.y / d, { x: ex, y: ey } = game.aimTip();
     ctx.lineCap = 'round'; ctx.lineWidth = 7; ctx.strokeStyle = LIGHT;
     ctx.beginPath(); ctx.moveTo(b.cx, b.cy); ctx.lineTo(ex, ey); ctx.stroke();
     ctx.beginPath();
@@ -129,8 +132,13 @@ export class Renderer {
 
     ctx.textAlign = 'left'; ctx.fillStyle = ink;
     ctx.font = `900 52px ${FONT}`; ctx.fillText(Math.round(this.shownScore), WALL_L, 46);
-    // Second line: the mode's best on the left; time (or time left) on the right.
     const m = game.rules, best = record(game.mode).best;
+    // Mode being played, centred at the top (nudged right if a long score would reach it).
+    const scoreEnd = WALL_L + ctx.measureText(Math.round(this.shownScore)).width;
+    const title = `${m.icon} ${tx(m.name)}`;
+    ctx.font = `900 22px ${FONT}`; ctx.globalAlpha = 0.75;
+    ctx.fillText(title, Math.max(W / 2 - ctx.measureText(title).width / 2, scoreEnd + 20), 32);
+    // Second line: the mode's best on the left; time (or time left) on the right.
     ctx.globalAlpha = 0.6; ctx.font = `800 20px ${FONT}`;
     ctx.fillText(`${m.icon} ${t('best')} ${m.byTime ? (best ? formatResult(game.mode, best) : '-') : Math.max(best, game.score)}`, WALL_L + 2, 94);
     ctx.textAlign = 'right';

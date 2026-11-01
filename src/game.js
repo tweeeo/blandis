@@ -12,7 +12,7 @@ import { theme, hsl } from './themes.js';
 import { t } from './i18n.js';
 import { sfx, buzz } from './audio.js';
 import { checkAchievements } from './achievements.js';
-import { MODES, addResult } from './modes.js';
+import { MODES, addResult, record } from './modes.js';
 
 const SHOTS_SETTLE = 3;   // s after the last shot (shots mode) for merges to finish before the run ends
 
@@ -74,8 +74,8 @@ export class Game {
     this.#time = 0; this.#timeMask = this.#key;
     this.#wallStart = wallNow(); this.#pausedAt = 0; this.#pausedMs = 0; this.#lastCheck = 0;
     this.#run = {
-      merges: 0, launches: 0, hardLaunches: 0, maxCombo: 0, gentleRun: 0, nearDeath: false,
-      flags: { cannon: false, bank: false, feather: false, closeCall: false, supreme: false },
+      merges: 0, launches: 0, hardLaunches: 0, maxCombo: 0, gentleRun: 0, nearDeath: false, lastMergeAt: -1,
+      flags: { cannon: false, bank: false, feather: false, closeCall: false, supreme: false, edge: false, lastShot: false },
     };
     this.tampered = false;
     this.combo = 0; this.lastMerge = -9; this.maxLevel = 0;
@@ -126,12 +126,15 @@ export class Game {
   #context() {
     const r = this.#run, s = save.stats;
     return {
+      mode: this.mode, end: this.endReason,
       score: this.#score, time: this.#time, maxLevel: this.maxLevel, blobs: this.world.blobs.filter(b => !b.tray).length,
       merges: r.merges, launches: r.launches, hardLaunches: r.hardLaunches, maxCombo: r.maxCombo,
-      gentleRun: r.gentleRun, flags: { ...r.flags },
+      gentleRun: r.gentleRun, lastMergeAt: r.lastMergeAt, flags: { ...r.flags },
+      bests: Object.fromEntries(Object.keys(MODES).map(id => [id, record(id).best])),
       life: {
         games: s.games + (this.#committed ? 0 : 1), merges: s.merges + r.merges,
         launches: s.launches + r.launches, playTime: s.playTime + this.#time,
+        played: [...new Set([...s.played, this.mode])],
       },
     };
   }
@@ -144,6 +147,7 @@ export class Game {
     if (!this.#verify()) return;
     const s = save.stats, r = this.#run;
     s.games++; s.merges += r.merges; s.launches += r.launches; s.playTime += this.#time;
+    if (!s.played.includes(this.mode)) s.played.push(this.mode);
     persist();
   }
 
@@ -168,7 +172,8 @@ export class Game {
     const b = this.trayBlobAt(p);
     if (!b) return;
     this.selected = b; this.hover = null;
-    this.grip = { x0: p.x, y0: p.y, x: p.x, y: p.y, id };
+    // Grip point kept relative to the blob: tray blobs keep sliding while held.
+    this.grip = { ox: p.x - b.cx, oy: p.y - b.cy, x: p.x, y: p.y, id };
     sfx.click();
   }
   moveAim(p, id) {
@@ -181,15 +186,22 @@ export class Game {
     this.moveAim(p, id);
     if (this.aimCancelled) this.cancelAim(); else this.#launch();
   }
-  /** Arrow was pulled out and brought back to the blob: releasing now puts it back. */
-  get aimCancelled() { return !!this.grip?.armed && this.aimPower() < CANCEL_POWER; }
+  /** Arrow was pulled out and then brought back to the blob or pointed above the danger line: releasing now puts it back. */
+  get aimCancelled() { return !!this.grip?.armed && (this.aimPower() < CANCEL_POWER || this.aimTip().y < DANGER); }
+  /** Where the drawn launch arrow ends. */
+  aimTip() {
+    const b = this.selected, p = this.aimPull(), d = Math.hypot(p.x, p.y);
+    if (!b || !d) return { x: b?.cx ?? 0, y: b?.cy ?? 0 };
+    const len = 24 + d * 0.75;
+    return { x: b.cx + p.x / d * len, y: b.cy + p.y / d * len };
+  }
   cancelAim() { this.selected = null; this.grip = null; }
 
-  /** Drag vector from the press point, clamped to MAX_PULL: the launch direction and strength. */
+  /** Drag vector from the grip point on the blob, clamped to MAX_PULL: the launch direction and strength. */
   aimPull() {
-    const g = this.grip;
-    if (!g) return { x: 0, y: 0 };
-    let x = g.x - g.x0, y = g.y - g.y0;
+    const g = this.grip, b = this.selected;
+    if (!g || !b) return { x: 0, y: 0 };
+    let x = g.x - (b.cx + g.ox), y = g.y - (b.cy + g.oy);
     const d = Math.hypot(x, y);
     if (d > MAX_PULL) { x *= MAX_PULL / d; y *= MAX_PULL / d; }
     return { x, y };
@@ -203,6 +215,8 @@ export class Game {
     b.tray = false; b.launched = true; b.power = power; b.age = 0; b.fresh = true; b.sideHit = false;
     b.setVelocity(power >= TAP_POWER ? pull.x * PULL_SPEED : 0, power >= TAP_POWER ? pull.y * PULL_SPEED : 0);
     sfx.launch(power); buzz(8);
+    // Speedrun: launched with the tray timer almost out.
+    if (this.rules.trayTimer && this.trayT > this.rules.trayTimer - 0.3) r.flags.edge = true;
     r.launches++;
     if (power > 0.5) r.hardLaunches++;
     r.gentleRun = power < 0.25 ? r.gentleRun + 1 : 0;
@@ -230,7 +244,8 @@ export class Game {
       this.#addScore(pts);
       fx.text(cx, cy - 10, '+' + pts, 26 + L * 2);
       if (this.combo > 1) fx.text(cx, cy - 44, 'x' + this.combo + '!', 34 + this.combo * 3, true);
-      r.merges++;
+      r.merges++; r.lastMergeAt = this.#time;
+      if (this.rules.shots && this.shotsLeft <= 0) r.flags.lastShot = true;
       r.maxCombo = Math.max(r.maxCombo, this.combo);
       const recent = [a, b].filter(o => o.age < 4);
       if (recent.some(o => o.launched && o.power > 0.95)) r.flags.cannon = true;
@@ -315,16 +330,16 @@ export class Game {
 
   /** reason: overflow | time | slow | shots | goal */
   gameOver(reason = 'overflow') {
-    this.#check();
-    this.state = 'ending'; this.endTimer = 0.6; this.selected = null; this.grip = null; this.hover = null; this.dangerT = 0;
     this.endReason = reason;
-    if (reason === 'goal') sfx.ach(); else sfx.over();
-    buzz([40, 60, 40]);
     if (this.#verify()) {
       // byTime modes only count runs that reach the goal, and their result is the time it took.
       this.result = !this.rules.byTime ? this.#score : reason === 'goal' ? this.#time : null;
       if (this.result !== null) this.isNewBest = addResult(this.mode, this.result);
     }
+    this.#check();   // last check: sees why the run ended and the result just stored
+    this.state = 'ending'; this.endTimer = 0.6; this.selected = null; this.grip = null; this.hover = null; this.dangerT = 0;
+    if (reason === 'goal') sfx.ach(); else sfx.over();
+    buzz([40, 60, 40]);
     this.#commitRun();
   }
 

@@ -2,8 +2,8 @@
 // slotted into the list and slides up past each entry it beats. Visual only: nothing is sent.
 import { W, H } from '../config.js';
 import { save } from '../storage.js';
-import { t } from '../i18n.js';
-import { fetchTop } from '../leaderboard.js';
+import { t, tx } from '../i18n.js';
+import { fetchTop, TOP_N } from '../leaderboard.js';
 import { MODES, formatResult } from '../modes.js';
 
 const ROW = 34, VISIBLE = 9, WIDTH = 260, GAP = 32;
@@ -15,6 +15,12 @@ export class Sidebar {
     this.el = document.getElementById('side');
     this.rows = []; this.items = []; this.me = null;
     this.rank = 0; this.score = -1; this.live = false; this.loaded = false;
+    // On the main menu the panel shows the mode picked in its own tabs (classic at first); in a run, the run's mode.
+    this.browseMode = 'classic'; this.browsing = false;
+    this.el.addEventListener('click', e => {
+      const v = e.target.closest('[data-v]')?.dataset.v;
+      if (v && this.browsing && v !== this.mode) { this.browseMode = v; this.refresh(); }
+    });
     addEventListener('resize', () => this.place());
     this.place();
   }
@@ -30,14 +36,23 @@ export class Sidebar {
   }
 
   async refresh() {
-    this.mode = this.game.mode;
-    try { this.rows = await fetchTop(this.mode); this.loaded = true; } catch (e) { this.loaded = false; }
+    this.browsing = this.game.state === 'attract';
+    const mode = this.mode = this.browsing ? this.browseMode : this.game.mode;
+    let rows = null;
+    try { rows = await fetchTop(mode); } catch (e) { /* offline: hide the panel */ }
+    if (mode !== this.mode) return;   // a newer refresh (another tab clicked) took over
+    this.rows = rows || []; this.loaded = !!rows;
     this.build(); this.place();
   }
 
   build() {
     const m = MODES[this.mode];
-    this.el.innerHTML = `<h3>🌍 ${t('globalTop')} · ${m.icon}</h3>
+    const head = this.browsing
+      ? `<h2>🌍 ${t('globalTop')}</h2><div class="tabs">${Object.entries(MODES).map(([id, o]) =>
+        `<button class="opt ${id === this.mode ? 'on' : ''}" data-v="${id}" title="${tx(o.name)}">${o.icon}</button>`).join('')}</div>
+        <p class="lbs-mode">${tx(m.name)}</p>`
+      : `<h2>🌍 ${t('globalTop')} · ${m.icon}</h2>`;
+    this.el.innerHTML = `${head}
       <div class="lbs-view" style="height:${ROW * VISIBLE}px"><div class="lbs-list"></div></div>
       <div class="lbs-foot"></div>`;
     this.view = this.el.querySelector('.lbs-view');
@@ -60,6 +75,8 @@ export class Sidebar {
 
   /** Called every frame; only touches the DOM when the score or the run state changes. */
   update(force = false) {
+    // Back on the main menu (or leaving it): switch between the browsed mode and the run's mode.
+    if ((this.game.state === 'attract') !== this.browsing) { this.refresh(); return; }
     if (!this.fits || !this.loaded) return;
     // Time-ranked modes (sprint) have no live score to slot in: the list is shown as it is.
     const g = this.game, live = !MODES[this.mode].byTime && ['play', 'paused', 'ending', 'over'].includes(g.state);
@@ -79,7 +96,8 @@ export class Sidebar {
     this.me.style.display = live ? '' : 'none';
     if (live) {
       this.me.style.transform = `translateY(${(rank - 1) * ROW}px)`;
-      this.me.firstChild.textContent = rank === 1 ? '👑' : rank;
+      // Below a full top the real rank is unknown: only that it's outside it.
+      this.me.firstChild.textContent = rank === 1 ? '👑' : rank > TOP_N ? TOP_N + '+' : rank;
       this.me.lastChild.textContent = g.score;
       if (passed) { this.me.dataset.up = '▲' + passed; this.flash(this.me, 'up'); }
     }

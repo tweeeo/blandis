@@ -16,9 +16,12 @@ async function call(init, query = '') {
 }
 const send = (method, data) => call({ method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
 
-/** Top 50 of a game mode: [{ name, score, time }], coerced so a bad response can't put markup in the numbers. */
+/** Rows shown in every leaderboard (the server sends up to 50). */
+export const TOP_N = 10;
+
+/** Top TOP_N of a game mode: [{ name, score, time }], coerced so a bad response can't put markup in the numbers. */
 export const fetchTop = mode => call(undefined, '?mode=' + encodeURIComponent(mode))
-  .then(rows => rows.map(r => ({ name: String(r.name), score: Number(r.score) | 0, time: Number(r.time) || 0 })));
+  .then(rows => rows.slice(0, TOP_N).map(r => ({ name: String(r.name), score: Number(r.score) | 0, time: Number(r.time) || 0 })));
 
 // A token from the server dated at the start of the run: it lets the server check that the run
 // took at least as long as it says. Without one (offline at the start) the score is rejected.
