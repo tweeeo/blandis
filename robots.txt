@@ -1,6 +1,7 @@
 # Everything is open: search engines, AI search and answer engines, and AI training.
-# To opt out of training only, set ai-train=no and add a Disallow group for
-# GPTBot, ClaudeBot, Google-Extended and CCBot.
+# To opt out of training only, set ai-train=no in both groups and add a Disallow group
+# for GPTBot, ClaudeBot, Google-Extended and CCBot. A crawler with its own group reads
+# only that group, so Content-Signal is repeated there.
 User-agent: *
 Content-Signal: search=yes, ai-input=yes, ai-train=yes
 Allow: /
@@ -15,6 +16,7 @@ User-agent: GPTBot
 User-agent: ClaudeBot
 User-agent: Google-Extended
 User-agent: CCBot
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 Allow: /
 
 Sitemap: https://blandis.u0f.es/sitemap.xml

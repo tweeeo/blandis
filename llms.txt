@@ -4,6 +4,7 @@
 
 ## Guides
 
+- [Blandis: a squishy physics merge puzzle](https://blandis.u0f.es/index.md): what the game is, how a round works, the game modes and achievements
 - [How to play Blandis](https://blandis.u0f.es/how-to-play.md): rules, controls, the five game modes, achievements, color styles and FAQ
 - [Cómo jugar a Blandis](https://blandis.u0f.es/como-jugar.md): the same guide in Spanish
 

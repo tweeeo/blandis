@@ -41,7 +41,7 @@ jobs:
           if [ -z "$API_URL" ]; then echo "::error::Set the LEADERBOARD_API repository secret to your leaderboard server URL"; exit 1; fi
           VERSION="${GITHUB_SHA::7}"
           mkdir _site
-          cp -r index.html how-to-play.html como-jugar.html how-to-play.md como-jugar.md 404.html robots.txt sitemap.xml llms.txt favicon.svg favicon.ico apple-touch-icon.png img css fonts legal _site/
+          cp -r index.html index.md how-to-play.html como-jugar.html how-to-play.md como-jugar.md 404.html robots.txt sitemap.xml llms.txt favicon.svg favicon.ico apple-touch-icon.png img css fonts legal _site/
           npx --yes esbuild@0.24.0 src/main.js --bundle --minify --format=iife --define:__VERSION__="\"$VERSION\"" --define:__API_URL__="\"$API_URL\"" --outfile=_site/game.js
           echo "$VERSION" > _site/version.txt
           sed -i "s#<script type=\"module\" src=\"src/main.js\"></script>#<script defer src=\"game.js?v=$VERSION\"></script>#" _site/index.html
