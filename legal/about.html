@@ -7,6 +7,49 @@
 <meta name="description" content="About Blandis, a free, non-commercial physics puzzle game for the browser: who makes it, how to get in touch, its source code and license.">
 <link rel="canonical" href="https://blandis.u0f.es/legal/about.html">
 <meta name="theme-color" content="#121010">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Blandis">
+<meta property="og:title" content="About Blandis">
+<meta property="og:description" content="Who makes Blandis, a free, non-commercial physics puzzle game for the browser, how to get in touch, its source code and license.">
+<meta property="og:url" content="https://blandis.u0f.es/legal/about.html">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://blandis.u0f.es/img/blandis-social.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:alt" content="Blandis: soft numbered blobs squishing and merging inside the jar">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="About Blandis">
+<meta name="twitter:description" content="Who makes Blandis, a free, non-commercial physics puzzle game for the browser, how to get in touch, its source code and license.">
+<meta name="twitter:image" content="https://blandis.u0f.es/img/blandis-social.png">
+<meta name="twitter:image:alt" content="Blandis: soft numbered blobs squishing and merging inside the jar">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "AboutPage",
+      "@id": "https://blandis.u0f.es/legal/about.html#webpage",
+      "url": "https://blandis.u0f.es/legal/about.html",
+      "name": "About Blandis",
+      "inLanguage": "en",
+      "isPartOf": { "@id": "https://blandis.u0f.es/#website" },
+      "about": { "@id": "https://blandis.u0f.es/#game" },
+      "mainEntity": { "@id": "https://blandis.u0f.es/#author" },
+      "dateModified": "2026-11-01",
+      "breadcrumb": { "@id": "https://blandis.u0f.es/legal/about.html#breadcrumb" }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://blandis.u0f.es/legal/about.html#breadcrumb",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Blandis", "item": "https://blandis.u0f.es/" },
+        { "@type": "ListItem", "position": 2, "name": "About", "item": "https://blandis.u0f.es/legal/about.html" }
+      ]
+    }
+  ]
+}
+</script>
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <link rel="stylesheet" href="legal.css">
@@ -21,7 +64,7 @@
     <a href="about.html" aria-current="page">About</a>
   </nav>
   <h1>About Blandis</h1>
-  <p class="updated">Last updated: 31 October 2026</p>
+  <p class="updated">Last updated: <time datetime="2026-11-01">1 November 2026</time></p>
 
   <h2>The project</h2>
   <p>Blandis is a free browser game: pick, launch, squish and merge soft numbered blobs up to 2048. It has an optional public leaderboard of high scores. New to the game? Read <a href="../how-to-play.html">how to play Blandis</a> (<a href="../como-jugar.html" hreflang="es" lang="es">en español</a>).</p>
@@ -30,6 +73,20 @@
     <p><b>Responsible:</b> Joel</p>
     <p><b>Contact:</b> <a href="mailto:ice.dev1234@gmail.com">ice.dev1234@gmail.com</a></p>
   </div>
+
+  <h2>What's in the game</h2>
+  <p>Every blob in Blandis is a soft ring that squashes, bulges and fills the gaps around it, so no two rounds play out the same way. Equal numbers that touch merge into their double, from 2 all the way to 2048. There are five game modes (Classic, Time attack, Speedrun, Sprint 512 and 40 shots), each with its own best scores and its own global leaderboard, more than 70 achievements, seven unlockable color styles and the option to put your own picture inside the jar. The game is available in English and Spanish and works with a mouse, a touchscreen or a keyboard.</p>
+
+  <h2>How it's built</h2>
+  <p>Blandis is written in plain JavaScript and drawn on an HTML canvas, with no game engine or framework. The physics is a small position-based soft-body solver written for this game: each blob is a ring of points pulled back toward a circle by shape matching, keeps its area so it behaves like a cushion rather than a balloon, and collides with the jar and with the other blobs. It runs at a fixed time step, so the game plays at the same speed on fast and slow devices.</p>
+  <p>The site is static and served by GitHub Pages; the source code is bundled into a single file on every release. The optional global leaderboard runs on Cloudflare Workers with a small database in the EU. The Nunito font is self-hosted, so no visitor data is sent to a font service, and Google Analytics only loads if you accept it.</p>
+
+  <h2>Changelog</h2>
+  <ul>
+    <li><b>1 November 2026:</b> five game modes with a global leaderboard each, achievements for every mode, leaderboard mode tabs, a full guide in English and Spanish, and an optional analytics consent banner.</li>
+    <li><b>31 October 2026:</b> global leaderboard, custom image inside the jar, cancelling a launch by dragging back to the blob, and the legal pages.</li>
+    <li><b>30 October 2026:</b> first release: soft-body number merging, the tray of up to three blobs, the run timer, the difficulty ramp and the first achievements.</li>
+  </ul>
 
   <h2>Source code</h2>
   <p>The game's source code is available in its <a href="https://github.com/u0f/blandis" rel="noopener">GitHub repository</a> under the PolyForm Noncommercial License 1.0.0: it can be used and modified for noncommercial purposes, with credit to the author. The license does not cover the leaderboard server or its API. The Nunito font is used under the SIL Open Font License 1.1.</p>

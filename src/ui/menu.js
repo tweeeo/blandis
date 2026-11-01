@@ -161,6 +161,7 @@ export class Menu {
         return `<p class="logo">Blandis</p><p class="sub">${t('tagline')}</p>
           ${btn('modes', t('play'), false)}${lbBtn}${achBtn}${btn('settings', t('settings'))}${btn('help', t('help'))}
           ${save.best ? best : ''}
+          <a class="more" href="#about-game">${t('moreAbout')} ↓</a>
           <p class="legal">${guideLink(t('guide'))} · ${legalLink('privacy', t('privacy'))} · ${legalLink('cookies', 'Cookies')} · ${legalLink('terms', t('terms'))} · ${legalLink('about', t('about'))}</p>`;
       case 'pause':
         return `<h2>${t('pause')}</h2>

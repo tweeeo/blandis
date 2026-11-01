@@ -23,7 +23,7 @@ export class Renderer {
   }
 
   resize() {
-    const dpr = Math.min(2, window.devicePixelRatio || 1), w = innerWidth, h = innerHeight;
+    const dpr = Math.min(2, window.devicePixelRatio || 1), w = this.cv.clientWidth, h = this.cv.clientHeight;
     this.cv.width = w * dpr; this.cv.height = h * dpr;
     const s = Math.min(w / W, h / H);
     this.view = { s, dpr, ox: (w - W * s) / 2, oy: (h - H * s) / 2 };
@@ -31,8 +31,8 @@ export class Renderer {
 
   /** Screen (CSS px) -> world coordinates. */
   toWorld(clientX, clientY) {
-    const v = this.view;
-    return { x: (clientX - v.ox) / v.s, y: (clientY - v.oy) / v.s };
+    const v = this.view, r = this.cv.getBoundingClientRect();
+    return { x: (clientX - r.left - v.ox) / v.s, y: (clientY - r.top - v.oy) / v.s };
   }
 
   draw() {

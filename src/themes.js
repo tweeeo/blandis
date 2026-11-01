@@ -32,7 +32,8 @@ export function setTheme(id) {
 export function applyTheme() {
   if (!THEMES[save.theme]) save.theme = 'clasico';
   theme = THEMES[save.theme];
-  document.body.style.background = `linear-gradient(${theme.bg[0]},${theme.bg[1]})`;
+  document.getElementById('stage').style.background = `linear-gradient(${theme.bg[0]},${theme.bg[1]})`;
+  document.body.style.background = theme.bg[1];
 }
 
 // Custom image drawn inside the jar (see Renderer#drawJar).

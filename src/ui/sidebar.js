@@ -28,7 +28,7 @@ export class Sidebar {
   /** Show only when the free space right of the jar fits the panel. */
   place() {
     const { s, ox, oy } = this.renderer.view;
-    this.fits = ox >= WIDTH + GAP * 2 && innerHeight >= 520;
+    this.fits = ox >= WIDTH + GAP * 2 && this.renderer.cv.clientHeight >= 520;
     this.el.classList.toggle('hide', !this.fits || !this.loaded);
     this.el.style.left = ox + W * s + GAP + 'px';
     this.el.style.top = oy + H * s * 0.2 + 'px';

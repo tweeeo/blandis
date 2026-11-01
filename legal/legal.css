@@ -23,6 +23,9 @@ nav { display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 4px; }
 nav a { text-decoration:none; padding:7px 12px; border-radius:12px; background:var(--soft); color:var(--ink);
   box-shadow:0 3px 0 var(--soft-dk); font-size:14px; }
 nav a[aria-current="page"] { background:var(--accent-dk); color:#fff; box-shadow:0 3px 0 #7a4433; }
+figure { margin:16px auto; max-width:360px; text-align:center; }
+figure img { display:block; width:100%; height:auto; border-radius:18px; box-shadow:0 6px 0 rgba(0,0,0,.12); }
+figcaption { margin-top:8px; font-size:14px; opacity:.8; }
 .box { background:var(--soft); border-radius:16px; padding:12px 16px; margin:10px 0; }
 .box p { margin:4px 0; }
 .box a { color:var(--ink); }

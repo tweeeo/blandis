@@ -1,4 +1,20 @@
+# Everything is open: search engines, AI search and answer engines, and AI training.
+# To opt out of training only, set ai-train=no and add a Disallow group for
+# GPTBot, ClaudeBot, Google-Extended and CCBot.
 User-agent: *
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Allow: /
+
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: Google-Extended
+User-agent: CCBot
 Allow: /
 
 Sitemap: https://blandis.u0f.es/sitemap.xml

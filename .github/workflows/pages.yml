@@ -22,6 +22,8 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history: the sitemap's <lastmod> comes from each page's last commit
       - uses: actions/configure-pages@v5
       - uses: actions/setup-node@v4
         with:
@@ -31,6 +33,7 @@ jobs:
       # The commit id is baked into the bundle and published as version.txt: open games compare
       # the two and offer a reload after a deploy (src/update.js). ?v= busts stale caches.
       # The leaderboard server URL lives in the LEADERBOARD_API secret, not in the code.
+      # The home page's stylesheet is minified and inlined so it doesn't block the first render.
       - name: Build site
         env:
           API_URL: ${{ secrets.LEADERBOARD_API }}
@@ -38,11 +41,24 @@ jobs:
           if [ -z "$API_URL" ]; then echo "::error::Set the LEADERBOARD_API repository secret to your leaderboard server URL"; exit 1; fi
           VERSION="${GITHUB_SHA::7}"
           mkdir _site
-          cp -r index.html how-to-play.html como-jugar.html 404.html robots.txt sitemap.xml favicon.svg apple-touch-icon.png img css fonts legal _site/
+          cp -r index.html how-to-play.html como-jugar.html how-to-play.md como-jugar.md 404.html robots.txt sitemap.xml llms.txt favicon.svg favicon.ico apple-touch-icon.png img css fonts legal _site/
           npx --yes esbuild@0.24.0 src/main.js --bundle --minify --format=iife --define:__VERSION__="\"$VERSION\"" --define:__API_URL__="\"$API_URL\"" --outfile=_site/game.js
           echo "$VERSION" > _site/version.txt
-          sed -i "s#<script type=\"module\" src=\"src/main.js\"></script>#<script defer src=\"game.js?v=$VERSION\"></script>#; s#css/style.css#css/style.css?v=$VERSION#" _site/index.html
+          sed -i "s#<script type=\"module\" src=\"src/main.js\"></script>#<script defer src=\"game.js?v=$VERSION\"></script>#" _site/index.html
           grep -q "game.js?v=$VERSION" _site/index.html
+          npx --yes esbuild@0.24.0 css/style.css --minify --log-level=warning --outfile=_site/inline.css
+          node -e "
+            const fs = require('fs'), tag = '<link rel=\"stylesheet\" href=\"css/style.css\">';
+            const css = fs.readFileSync('_site/inline.css', 'utf8').replaceAll('../fonts/', 'fonts/');
+            const html = fs.readFileSync('_site/index.html', 'utf8');
+            if (!html.includes(tag)) { console.error('stylesheet link not found in index.html'); process.exit(1); }
+            fs.writeFileSync('_site/index.html', html.replace(tag, () => '<style>' + css + '</style>'));"
+          rm _site/inline.css
+          for page in index.html how-to-play.html como-jugar.html legal/about.html; do
+            url="https://blandis.u0f.es/${page%index.html}"
+            sed -i "s#<loc>$url</loc>#<loc>$url</loc>\n    <lastmod>$(git log -1 --format=%cs -- "$page")</lastmod>#" _site/sitemap.xml
+          done
+          test "$(grep -c '<lastmod>' _site/sitemap.xml)" -eq 4
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

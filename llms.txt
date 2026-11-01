@@ -1,0 +1,12 @@
+# Blandis
+
+> Free squishy physics merge puzzle for the browser: launch soft numbered blobs into a jar and merge equal numbers up to 2048. Five game modes, more than 70 achievements and a global leaderboard per mode. Mobile and desktop, no install, no ads.
+
+## Guides
+
+- [How to play Blandis](https://blandis.u0f.es/how-to-play.md): rules, controls, the five game modes, achievements, color styles and FAQ
+- [Cómo jugar a Blandis](https://blandis.u0f.es/como-jugar.md): the same guide in Spanish
+
+## About
+
+- [About Blandis](https://blandis.u0f.es/legal/about.html): who makes it, source code, license and contact

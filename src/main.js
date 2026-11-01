@@ -57,7 +57,15 @@ document.addEventListener('visibilitychange', () => { if (document.hidden && gam
 // (this also means game time can never run faster than real time).
 // rAF is captured now so a console script can't swap it later to speed the game up.
 const raf = window.requestAnimationFrame.bind(window);
-let last = performance.now(), acc = 0;
+let last = performance.now(), acc = 0, scrollLocked = false;
+// During a run the page can't scroll, so a drag on the jar never moves it; the game is brought fully into view first.
+function lockScroll() {
+  const locked = game.state === 'play' || game.state === 'ending';
+  if (locked === scrollLocked) return;
+  scrollLocked = locked;
+  if (locked) scrollTo({ top: 0, behavior: 'instant' });
+  document.body.classList.toggle('playing', locked);
+}
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   if (game.running) {
@@ -69,6 +77,7 @@ function frame(now) {
   game.fx.update(dt);
   renderer.draw();
   sidebar.update();
+  lockScroll();
   raf(frame);
 }
 
