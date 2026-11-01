@@ -53,6 +53,8 @@ ol { text-align:left; margin:12px auto; padding-left:28px; max-width:220px; font
 .ach b { display:block; }
 .ach span { font-size:13px; opacity:.8; }
 .ach .ic { font-size:22px; width:30px; text-align:center; }
+.ach.mode { width:100%; font:inherit; color:inherit; border:3px solid transparent; cursor:pointer; }
+.ach.mode.on { border-color:var(--accent); }
 .ach.lock { opacity:.5; }
 .progress { height:12px; border-radius:99px; background:var(--soft); overflow:hidden; margin:4px 0 6px; }
 .progress i { display:block; height:100%; background:var(--accent); border-radius:99px; }
@@ -64,6 +66,8 @@ ol { text-align:left; margin:12px auto; padding-left:28px; max-width:220px; font
 .row > div { display:flex; gap:6px; }
 .opt { font:inherit; font-weight:800; font-size:14px; padding:8px 12px; border-radius:12px; border:0; cursor:pointer; background:transparent; color:var(--ink); }
 .opt.on { background:var(--accent); color:#fff; }
+.tabs { display:flex; justify-content:center; gap:4px; padding:4px; border-radius:14px; background:var(--soft); }
+.tabs .opt { flex:1; font-size:18px; padding:6px 0; }
 
 .card input { flex:1; min-width:0; font:inherit; font-weight:800; font-size:15px; padding:8px 12px; border-radius:12px;
   border:2px solid var(--soft-dk); background:#fff; color:var(--ink); user-select:text; -webkit-user-select:text; }

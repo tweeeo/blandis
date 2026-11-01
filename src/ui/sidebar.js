@@ -1,9 +1,10 @@
-// Global leaderboard beside the jar on wide screens. During a run the player's live score is
+// Global leaderboard of the current game mode beside the jar on wide screens. During a run the player's live score is
 // slotted into the list and slides up past each entry it beats. Visual only: nothing is sent.
 import { W, H } from '../config.js';
 import { save } from '../storage.js';
 import { t } from '../i18n.js';
 import { fetchTop } from '../leaderboard.js';
+import { MODES, formatResult } from '../modes.js';
 
 const ROW = 34, VISIBLE = 9, WIDTH = 260, GAP = 32;
 const esc = s => String(s).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
@@ -29,12 +30,14 @@ export class Sidebar {
   }
 
   async refresh() {
-    try { this.rows = await fetchTop(); this.loaded = true; } catch (e) { this.loaded = false; }
+    this.mode = this.game.mode;
+    try { this.rows = await fetchTop(this.mode); this.loaded = true; } catch (e) { this.loaded = false; }
     this.build(); this.place();
   }
 
   build() {
-    this.el.innerHTML = `<h3>🌍 ${t('globalTop')}</h3>
+    const m = MODES[this.mode];
+    this.el.innerHTML = `<h3>🌍 ${t('globalTop')} · ${m.icon}</h3>
       <div class="lbs-view" style="height:${ROW * VISIBLE}px"><div class="lbs-list"></div></div>
       <div class="lbs-foot"></div>`;
     this.view = this.el.querySelector('.lbs-view');
@@ -43,7 +46,7 @@ export class Sidebar {
     this.items = this.rows.map(r => {
       const li = document.createElement('div');
       li.className = 'lbs-row' + (save.name && r.name === save.name ? ' own' : '');
-      li.innerHTML = `<i></i><span>${esc(r.name)}</span><b>${r.score}</b>`;
+      li.innerHTML = `<i></i><span>${esc(r.name)}</span><b>${m.byTime ? formatResult(this.mode, r.time) : r.score}</b>`;
       this.list.append(li);
       return li;
     });
@@ -58,7 +61,8 @@ export class Sidebar {
   /** Called every frame; only touches the DOM when the score or the run state changes. */
   update(force = false) {
     if (!this.fits || !this.loaded) return;
-    const g = this.game, live = ['play', 'paused', 'ending', 'over'].includes(g.state);
+    // Time-ranked modes (sprint) have no live score to slot in: the list is shown as it is.
+    const g = this.game, live = !MODES[this.mode].byTime && ['play', 'paused', 'ending', 'over'].includes(g.state);
     if (!force && live === this.live && g.score === this.score) return;
     const started = live && !this.live;
     this.live = live; this.score = g.score;

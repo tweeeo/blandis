@@ -22,6 +22,7 @@ const STR = {
     delMine: 'Delete my global score', delConfirm: 'Tap again to delete it', deleted: 'Your global score has been deleted.',
     consentText: 'Can Blandis use Google Analytics cookies to count visits and see how the game is played? They are only set if you accept.',
     moreInfo: 'More info', accept: 'Accept', reject: 'Reject', analytics: 'Analytics',
+    modes: 'Game mode', score: 'Score', timeUp: "Time's up!", tooSlow: 'Too slow!', noShots: 'Out of shots!', goalDone: '512 reached!',
     helpList: [
       'Up to 3 blobs wait in the tray at the top. Press the one you want to use.',
       'Drag toward where it should go (an arrow shows the shot) and release. The further you drag, the harder it flies.',
@@ -53,6 +54,7 @@ const STR = {
     delMine: 'Borrar mi puntuación mundial', delConfirm: 'Pulsa otra vez para borrarla', deleted: 'Tu puntuación mundial se ha borrado.',
     consentText: '¿Puede Blandis usar cookies de Google Analytics para contar visitas y ver cómo se juega? Solo se activan si aceptas.',
     moreInfo: 'Más info', accept: 'Aceptar', reject: 'Rechazar', analytics: 'Analítica',
+    modes: 'Modo de juego', score: 'Puntos', timeUp: '¡Se acabó el tiempo!', tooSlow: '¡Demasiado lento!', noShots: '¡Sin tiros!', goalDone: '¡512 conseguido!',
     helpList: [
       'Hasta 3 blandis esperan en la bandeja de arriba. Pulsa el que quieras usar.',
       'Arrastra hacia donde quieras lanzarlo (una flecha marca el tiro) y suelta. Cuanto más arrastras, más fuerte.',

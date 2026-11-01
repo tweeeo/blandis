@@ -4,8 +4,8 @@ import {
   TRAY_L, TRAY_R, TRAY_TOP, TRAY_BOT, valueOf,
 } from './config.js';
 import { theme, hsl, jarImg } from './themes.js';
-import { save } from './storage.js';
 import { t, formatTime } from './i18n.js';
+import { record, formatResult } from './modes.js';
 
 const LINE = '#0b0a09';
 const LIGHT = '#fff6ea';
@@ -129,11 +129,25 @@ export class Renderer {
 
     ctx.textAlign = 'left'; ctx.fillStyle = ink;
     ctx.font = `900 52px ${FONT}`; ctx.fillText(Math.round(this.shownScore), WALL_L, 46);
+    // Second line: the mode's best on the left; time (or time left) on the right.
+    const m = game.rules, best = record(game.mode).best;
     ctx.globalAlpha = 0.6; ctx.font = `800 20px ${FONT}`;
-    ctx.fillText(t('best') + ' ' + Math.max(save.best, game.score), WALL_L + 2, 94);
+    ctx.fillText(`${m.icon} ${t('best')} ${m.byTime ? (best ? formatResult(game.mode, best) : '-') : Math.max(best, game.score)}`, WALL_L + 2, 94);
     ctx.textAlign = 'right';
-    ctx.fillText(t('time') + ' ' + formatTime(game.time), WALL_R, 94);
+    ctx.fillText(m.limit ? `⏱️ ${formatTime(Math.ceil(Math.max(0, m.limit - game.time)))}`
+      : t('time') + ' ' + formatTime(game.time), WALL_R, 94);
     ctx.textAlign = 'center'; ctx.globalAlpha = 1;
+    // Shots mode: launches used out of the total, red near the end.
+    if (m.shots) {
+      const left = Math.max(0, game.shotsLeft);
+      ctx.fillStyle = left <= 5 ? '#ff3c5a' : ink; ctx.font = `900 30px ${FONT}`;
+      ctx.fillText(`🎯 ${m.shots - left}/${m.shots}`, W / 2, 94);
+    }
+    // Speedrun: countdown while the tray is full.
+    if (m.trayTimer && game.trayT > 0 && game.state === 'play') {
+      ctx.fillStyle = '#ff3c5a'; ctx.font = `900 26px ${FONT}`;
+      ctx.fillText(`⚡ ${Math.max(0, m.trayTimer - game.trayT).toFixed(1)}`, W / 2, 94);
+    }
 
     // Evolution chain under the jar
     let x = WALL_L + 14;

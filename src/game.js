@@ -12,6 +12,9 @@ import { theme, hsl } from './themes.js';
 import { t } from './i18n.js';
 import { sfx, buzz } from './audio.js';
 import { checkAchievements } from './achievements.js';
+import { MODES, addResult } from './modes.js';
+
+const SHOTS_SETTLE = 3;   // s after the last shot (shots mode) for merges to finish before the run ends
 
 // Captured at load, before any console script could replace them.
 const wallNow = Date.now;
@@ -32,6 +35,7 @@ export class Game {
     this.world = new World();
     this.fx = new Effects();
     this.state = 'attract';
+    this.mode = save.mode;
     this.clock = 0;
     this.tampered = false;
     this.onOver = () => {};
@@ -42,6 +46,8 @@ export class Game {
   get score() { return this.#score; }
   get time() { return this.#time; }
   get merges() { return this.#run.merges; }
+  get rules() { return MODES[this.mode]; }
+  get shotsLeft() { return this.rules.shots - this.#run.launches; }
 
   #addScore(pts) {
     this.#verify();
@@ -73,11 +79,12 @@ export class Game {
     };
     this.tampered = false;
     this.combo = 0; this.lastMerge = -9; this.maxLevel = 0;
-    this.dangerT = 0; this.spawnTimer = 0; this.endTimer = 0;
+    this.dangerT = 0; this.spawnTimer = 0; this.endTimer = 0; this.trayT = 0; this.settleT = 0;
     this.isNewBest = false; this.selected = null; this.grip = null; this.hover = null;
+    this.endReason = ''; this.result = null;
   }
 
-  start() { this.reset(); this.state = 'play'; this.#committed = false; this.onStart(); }
+  start(mode = save.mode) { this.mode = mode; this.reset(); this.state = 'play'; this.#committed = false; this.onStart(); }
 
   /** A pile of blobs falling behind the main menu. */
   attract() {
@@ -104,6 +111,7 @@ export class Game {
   #refillTray() {
     const tray = this.tray;
     if (tray.length >= TRAY_SIZE) return;
+    if (this.rules.shots && this.#run.launches + tray.length >= this.rules.shots) return;
     const level = randomSpawnLevel(this.maxLevel), r = radiusOf(level);
     // Room check: a squashed blob takes roughly area / channel height of tray length.
     const len = b => b.maxX - b.minX, h = TRAY_BOT - TRAY_TOP;
@@ -284,21 +292,38 @@ export class Game {
       const r = this.#run;
       if (this.dangerT > DANGER_TIME - 0.5) r.nearDeath = true;
       if (this.dangerT === 0 && r.nearDeath) { r.nearDeath = false; r.flags.closeCall = true; }
-      if (this.dangerT > DANGER_TIME) this.gameOver();
+      const end = this.dangerT > DANGER_TIME ? 'overflow' : this.#modeEnd(dt);
+      if (end) this.gameOver(end);
       else if (this.#time - this.#lastCheck >= 1) { this.#lastCheck = this.#time; this.#check(); }
     } else if (this.state === 'ending') {
       this.tickEnding(dt);
     }
   }
 
-  gameOver() {
+  /** The current mode's own ending rule, checked every step after the danger line: why the run ends now, or ''. */
+  #modeEnd(dt) {
+    const m = this.rules;
+    if (m.limit && this.#time >= m.limit) return 'time';
+    if (m.trayTimer) {
+      this.trayT = this.tray.length >= TRAY_SIZE ? this.trayT + dt : 0;
+      if (this.trayT > m.trayTimer) return 'slow';
+    }
+    if (m.shots && this.shotsLeft <= 0 && (this.settleT += dt) > SHOTS_SETTLE) return 'shots';
+    if (m.goal && this.maxLevel >= m.goal) return 'goal';
+    return '';
+  }
+
+  /** reason: overflow | time | slow | shots | goal */
+  gameOver(reason = 'overflow') {
     this.#check();
     this.state = 'ending'; this.endTimer = 0.6; this.selected = null; this.grip = null; this.hover = null; this.dangerT = 0;
-    sfx.over(); buzz([40, 60, 40]);
+    this.endReason = reason;
+    if (reason === 'goal') sfx.ach(); else sfx.over();
+    buzz([40, 60, 40]);
     if (this.#verify()) {
-      this.isNewBest = this.#score > save.best;
-      if (this.isNewBest) save.best = this.#score;
-      save.top = [...save.top, this.#score].sort((a, b) => b - a).slice(0, 5);
+      // byTime modes only count runs that reach the goal, and their result is the time it took.
+      this.result = !this.rules.byTime ? this.#score : reason === 'goal' ? this.#time : null;
+      if (this.result !== null) this.isNewBest = addResult(this.mode, this.result);
     }
     this.#commitRun();
   }

@@ -36,7 +36,7 @@
   <div class="table-wrap"><table>
     <tr><th>Data</th><th>Purpose</th><th>Stored</th><th>Public</th></tr>
     <tr><td>Nickname you choose</td><td>Show your entry in the leaderboard</td><td>Yes</td><td>Yes</td></tr>
-    <tr><td>Score and game duration</td><td>Rank entries and check that the score is plausible</td><td>Yes (best run only)</td><td>Yes</td></tr>
+    <tr><td>Game mode, score and game duration</td><td>Rank entries in that mode's leaderboard and check that the result is plausible</td><td>Yes (best run per mode only)</td><td>Yes</td></tr>
     <tr><td>Player identifier</td><td>Keep only your best run and let you delete your entry</td><td>Yes</td><td>No</td></tr>
     <tr><td>Number of merges in the game</td><td>Check that the score is plausible</td><td>No</td><td>No</td></tr>
   </table></div>
@@ -64,7 +64,7 @@
 
   <h2>3. How long data is kept</h2>
   <ul>
-    <li><b>Leaderboard entry:</b> until you delete it, or automatically 12 months after the last game you sent, whichever comes first. The server checks this every hour.</li>
+    <li><b>Leaderboard entry (one per game mode):</b> until you delete it, or automatically 12 months after the last game you sent in that mode, whichever comes first. The server checks this every hour.</li>
     <li><b>IP address for abuse prevention:</b> deleted after the 10-second window; an automatic clean-up runs every hour, so it is kept for about one hour at most.</li>
     <li><b>Code derived from the IP address and its count of new entries:</b> deleted 24 hours after the first new entry from that address (clean-up every hour).</li>
     <li><b>Used game codes:</b> deleted 12 hours after they were handed out (clean-up every hour).</li>
@@ -85,12 +85,12 @@
   <p>Apart from Google Analytics (only with your consent), the game does not load fonts, scripts or any other content from other third parties.</p>
 
   <h2>5. Who can see your data</h2>
-  <p>Anyone can see the public leaderboard: nickname, score and game duration of the top 50 entries. The player identifier, dates and IP address are never shown or shared. Analytics statistics are only seen by us. Data is not sold or used for advertising.</p>
+  <p>Anyone can see the public leaderboards (one per game mode): nickname, score and game duration of the top 50 entries of each. The player identifier, dates and IP address are never shown or shared. Analytics statistics are only seen by us. Data is not sold or used for advertising.</p>
 
   <h2>6. Your rights</h2>
   <p>Under the GDPR and the Spanish LOPDGDD you have the right to access, rectify and erase your data, to restrict or object to its processing, and to data portability.</p>
   <ul>
-    <li><b>Erase your leaderboard entry:</b> in the game, go to <b>Settings → Delete my global score</b>. The entry is removed from the server immediately, and the nickname and identifier are removed from your device.</li>
+    <li><b>Erase your leaderboard entries:</b> in the game, go to <b>Settings → Delete my global score</b>. Your entries in every game mode are removed from the server immediately, and the nickname and identifier are removed from your device.</li>
     <li><b>Change your nickname:</b> change it in <b>Settings</b>; the leaderboard is updated the next time a game is sent. You can also delete your entry and join again.</li>
     <li><b>Other requests:</b> write to <a href="mailto:ice.dev1234@gmail.com">ice.dev1234@gmail.com</a>. Include your player identifier, which you can find in your browser's local storage for this site under the key <code>blandis-v2</code>. We will answer within one month.</li>
   </ul>

@@ -13,7 +13,8 @@ const freshProgress = () => ({
 
 // name / pid: global leaderboard nickname and anonymous player id.
 // ga: Google Analytics consent (null = not asked yet).
-export const save = { ...freshProgress(), theme: 'clasico', muted: false, lang: 'en', name: '', pid: '', bg: '', ga: null };
+// mode: last game mode played · modes: { [mode]: { best, top } } for every mode but classic (src/modes.js).
+export const save = { ...freshProgress(), theme: 'clasico', muted: false, lang: 'en', name: '', pid: '', bg: '', ga: null, mode: 'classic', modes: {} };
 
 // cyrb53: small, fast 53-bit string hash.
 function hash(str) {
@@ -26,7 +27,8 @@ function hash(str) {
   h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
   return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
 }
-const sign = d => hash(SALT + JSON.stringify([d.best, d.top, d.ach, d.stats]) + SALT);
+// modes is only signed once it has results, so saves from before game modes keep their signature.
+const sign = d => hash(SALT + JSON.stringify([d.best, d.top, d.ach, d.stats, ...(Object.keys(d.modes || {}).length ? [d.modes] : [])]) + SALT);
 
 try {
   const raw = JSON.parse(localStorage.getItem(KEY) || 'null');
@@ -36,7 +38,7 @@ try {
       save.stats = { ...freshProgress().stats, ...raw.stats };
     } else {
       // Tampered: keep harmless settings only.
-      Object.assign(save, { theme: raw.theme, muted: !!raw.muted, lang: raw.lang, name: raw.name, pid: raw.pid, bg: raw.bg, ga: raw.ga });
+      Object.assign(save, { theme: raw.theme, muted: !!raw.muted, lang: raw.lang, name: raw.name, pid: raw.pid, bg: raw.bg, ga: raw.ga, mode: raw.mode });
     }
   }
 } catch (e) { /* private mode or corrupt data */ }
@@ -45,6 +47,7 @@ if (save.lang !== 'es') save.lang = 'en';
 if (typeof save.name !== 'string') save.name = '';
 if (typeof save.bg !== 'string') save.bg = '';
 if (typeof save.ga !== 'boolean') save.ga = null;
+if (!save.modes || typeof save.modes !== 'object') save.modes = {};
 // The player id is only created when a score is first sent to the global leaderboard.
 if (!/^[0-9a-f]{32}$/.test(save.pid)) save.pid = '';
 

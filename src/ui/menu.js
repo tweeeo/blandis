@@ -6,6 +6,10 @@ import { ACHIEVEMENTS, isThemeUnlocked, unlock, unlockedCount } from '../achieve
 import { sfx, unlockAudio } from '../audio.js';
 import { fetchTop, submitScore, deleteScore, NAME_RE } from '../leaderboard.js';
 import { hasAnalytics, setAnalytics } from '../analytics.js';
+import { MODES, record, formatResult } from '../modes.js';
+
+// Title of the game over screen for each Game#endReason.
+const END_TITLE = { overflow: 'over', time: 'timeUp', slow: 'tooSlow', shots: 'noShots', goal: 'goalDone' };
 
 const esc = s => String(s).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
 const legalLink = (page, label) => `<a href="legal/${page}.html" target="_blank" rel="noopener">${label}</a>`;
@@ -41,7 +45,7 @@ export class Menu {
     // Scores are sent automatically only after the player has joined once (age + terms accepted,
     // which is when the player id is created); otherwise the join form is shown.
     game.onOver = () => {
-      this.lb = game.tampered || !game.score ? null : save.name && save.pid ? 'sending' : 'ask';
+      this.lb = game.tampered || !game.result ? null : save.name && save.pid ? 'sending' : 'ask';
       this.show('over');
       if (this.lb === 'sending') this.send();
     };
@@ -51,7 +55,7 @@ export class Menu {
   async send() {
     const g = this.game, line = () => { const el = document.getElementById('lbLine'); if (el) el.innerHTML = this.lbLine(); };
     this.lb = 'sending'; line();
-    try { this.lb = (await submitScore(g.score, g.time, g.merges)).rank; } catch (e) { this.lb = 'error'; }
+    try { this.lb = (await submitScore(g.mode, g.score, g.time, g.merges)).rank; } catch (e) { this.lb = 'error'; }
     line();
   }
 
@@ -106,10 +110,12 @@ export class Menu {
 
   async loadTop() {
     let html;
+    const mode = this.lbMode;
     try {
-      const rows = await fetchTop();
+      const rows = await fetchTop(mode), byTime = MODES[mode].byTime;
+      if (mode !== this.lbMode) return;   // another tab was picked while this one loaded
       html = rows.length
-        ? `<ol class="lb">${rows.map(r => `<li class="${r.name === save.name ? 'me' : ''}">${esc(r.name)}<b>${r.score}</b></li>`).join('')}</ol>`
+        ? `<ol class="lb">${rows.map(r => `<li class="${r.name === save.name ? 'me' : ''}">${esc(r.name)}<b>${byTime ? formatResult(mode, r.time) : r.score}</b></li>`).join('')}</ol>`
         : `<p class="sub">${t('lbEmpty')}</p>`;
     } catch (e) { html = `<p class="sub">${t('lbError')}</p>`; }
     const el = document.getElementById('lbList');
@@ -151,23 +157,35 @@ export class Menu {
     switch (screen) {
       case 'start':
         return `<h1>Blandis</h1><p class="sub">${t('tagline')}</p>
-          ${btn('play', t('play'), false)}${lbBtn}${achBtn}${btn('settings', t('settings'))}${btn('help', t('help'))}
+          ${btn('modes', t('play'), false)}${lbBtn}${achBtn}${btn('settings', t('settings'))}${btn('help', t('help'))}
           ${save.best ? best : ''}
           <p class="legal">${legalLink('privacy', t('privacy'))} · ${legalLink('cookies', 'Cookies')} · ${legalLink('terms', t('terms'))} · ${legalLink('about', t('about'))}</p>`;
       case 'pause':
         return `<h2>${t('pause')}</h2>
           ${btn('resume', t('resume'), false)}${btn('play', t('restart'))}${achBtn}${btn('settings', t('settings'))}
           ${btn('help', t('help'))}${btn('menu', t('mainMenu'))}`;
-      case 'over':
-        return `<h2>${t('over')}</h2><div class="score">${g.score}</div>
-          <p class="sub">${t('time')}: <b>${formatTime(g.time)}</b></p>
+      case 'modes':
+        return `<h2>${t('modes')}</h2>${Object.entries(MODES).map(([id, m]) => {
+          const b = record(id).best;
+          return `<button class="ach mode ${save.mode === id ? 'on' : ''}" data-a="mode" data-v="${id}"><div class="ic">${m.icon}</div>
+            <div><b>${tx(m.name)}</b><span>${tx(m.desc)}${b ? ` · ${t('best')}: ${formatResult(id, b)}` : ''}</span></div></button>`;
+        }).join('')}${back}`;
+      case 'over': {
+        // Main number: the score, or the time for byTime modes ('—' if the goal wasn't reached).
+        const m = g.rules, rec = record(g.mode), fmt = v => formatResult(g.mode, v);
+        return `<h2>${t(END_TITLE[g.endReason] || 'over')}</h2><p class="sub">${m.icon} ${tx(m.name)}</p>
+          <div class="score">${m.byTime ? (g.result === null ? '—' : fmt(g.result)) : g.score}</div>
+          <p class="sub">${m.byTime ? `${t('score')}: <b>${g.score}</b>` : `${t('time')}: <b>${formatTime(g.time)}</b>`}</p>
           ${g.tampered ? `<p class="warn">${t('notRecorded')}</p>` : ''}
-          ${g.isNewBest && g.score > 0 ? `<span class="badge">${t('newBest')}</span>` : best}
-          <ol>${save.top.map(v => `<li>${v}</li>`).join('')}</ol>
+          ${g.isNewBest && g.result > 0 ? `<span class="badge">${t('newBest')}</span>` : rec.best ? `<p class="sub">${t('best')}: <b>${fmt(rec.best)}</b></p>` : ''}
+          <ol>${rec.top.map(v => `<li>${fmt(v)}</li>`).join('')}</ol>
           <div id="lbLine">${this.lbLine()}</div>
-          ${btn('play', t('again'), false)}${g.score ? btn('share', `📤 ${t('share')}`) : ''}${lbBtn}${btn('menu', t('mainMenu'))}`;
+          ${btn('play', t('again'), false)}${g.score ? btn('share', `📤 ${t('share')}`) : ''}${lbBtn}${btn('modes', t('modes'))}${btn('menu', t('mainMenu'))}`;
+      }
       case 'lb':
-        return `<h2>🌍 ${t('globalTop')}</h2><div id="lbList"><p class="sub">${t('loading')}</p></div>${back}`;
+        return `<h2>🌍 ${t('globalTop')}</h2>
+          <div class="tabs">${Object.entries(MODES).map(([id, m]) => opt('lbMode', id, this.lbMode === id, m.icon)).join('')}</div>
+          <p class="sub">${tx(MODES[this.lbMode].name)}</p><div id="lbList"><p class="sub">${t('loading')}</p></div>${back}`;
       case 'settings':
         return `<h2>${t('settings')}</h2>
           <div class="row"><b>${t('language')}</b><div>${Object.entries(LANGS).map(([id, name]) => opt('lang', id, save.lang === id, name)).join('')}</div></div>
@@ -223,6 +241,9 @@ export class Menu {
       case 'bgSet': this.applyBg(); break;
       case 'bgDel': setBg(''); this.show('settings', false); break;
       case 'play': g.start(); this.hide(); break;
+      case 'lb': this.lbMode = g.mode; this.show('lb'); break;
+      case 'lbMode': this.lbMode = v; this.show('lb', false); break;
+      case 'mode': save.mode = v; persist(); g.start(); this.hide(); break;
       case 'resume': g.resume(); this.hide(); break;
       case 'menu': g.attract(); this.show('start'); break;
       case 'send': this.send(); break;
