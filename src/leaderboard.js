@@ -16,7 +16,7 @@ async function call(init, query = '') {
 }
 const send = (method, data) => call({ method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
 
-/** Rows shown in every leaderboard (the server sends up to 50). */
+/** Rows shown in every leaderboard (the server sends the same number). */
 export const TOP_N = 10;
 
 /** Top TOP_N of a game mode: [{ name, score, time }], coerced so a bad response can't put markup in the numbers. */
