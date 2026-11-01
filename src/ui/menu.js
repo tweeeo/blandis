@@ -13,6 +13,8 @@ const END_TITLE = { overflow: 'over', time: 'timeUp', slow: 'tooSlow', shots: 'n
 
 const esc = s => String(s).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
 const legalLink = (page, label) => `<a href="legal/${page}.html" target="_blank" rel="noopener">${label}</a>`;
+// Static, crawlable how-to-play page in the current language.
+const guideLink = label => `<a href="${save.lang === 'es' ? 'como-jugar' : 'how-to-play'}.html" target="_blank" rel="noopener">${label}</a>`;
 
 const ICON_PAUSE = '<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><rect x="4" y="3" width="4" height="14" rx="2" fill="currentColor"/><rect x="12" y="3" width="4" height="14" rx="2" fill="currentColor"/></svg>';
 const ICON_SOUND = on => `<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 8h4l5-4v14l-5-4H3z" fill="currentColor"/>${on
@@ -159,7 +161,7 @@ export class Menu {
         return `<h1>Blandis</h1><p class="sub">${t('tagline')}</p>
           ${btn('modes', t('play'), false)}${lbBtn}${achBtn}${btn('settings', t('settings'))}${btn('help', t('help'))}
           ${save.best ? best : ''}
-          <p class="legal">${legalLink('privacy', t('privacy'))} · ${legalLink('cookies', 'Cookies')} · ${legalLink('terms', t('terms'))} · ${legalLink('about', t('about'))}</p>`;
+          <p class="legal">${guideLink(t('guide'))} · ${legalLink('privacy', t('privacy'))} · ${legalLink('cookies', 'Cookies')} · ${legalLink('terms', t('terms'))} · ${legalLink('about', t('about'))}</p>`;
       case 'pause':
         return `<h2>${t('pause')}</h2>
           ${btn('resume', t('resume'), false)}${btn('play', t('restart'))}${achBtn}${btn('settings', t('settings'))}
@@ -219,7 +221,8 @@ export class Menu {
               <div><b>${tx(a.name)}</b><span>${tx(a.desc)}${reward}</span></div></div>`;
           }).join('')}${back}`;
       case 'help':
-        return `<h2>${t('help')}</h2><ul class="help">${t('helpList').map(s => `<li>${s}</li>`).join('')}</ul>${back}`;
+        return `<h2>${t('help')}</h2><ul class="help">${t('helpList').map(s => `<li>${s}</li>`).join('')}</ul>
+          <p class="note">${guideLink(t('fullGuide'))}</p>${back}`;
     }
     return '';
   }

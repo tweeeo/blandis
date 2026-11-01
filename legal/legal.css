@@ -17,14 +17,15 @@ body { margin:0; min-height:100vh; padding:24px 16px 40px; font-family:"Nunito",
 h1 { font-size:28px; font-weight:900; margin:4px 0 2px; }
 h2 { font-size:20px; font-weight:900; margin:26px 0 8px; }
 h3 { font-size:16px; font-weight:900; margin:18px 0 6px; }
-.updated { margin:0 0 14px; opacity:.7; font-size:14px; }
+.updated { margin:0 0 14px; opacity:.8; font-size:14px; }
 a { color:var(--accent-dk); font-weight:800; }
 nav { display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 4px; }
 nav a { text-decoration:none; padding:7px 12px; border-radius:12px; background:var(--soft); color:var(--ink);
   box-shadow:0 3px 0 var(--soft-dk); font-size:14px; }
-nav a[aria-current="page"] { background:var(--accent); color:#fff; box-shadow:0 3px 0 var(--accent-dk); }
+nav a[aria-current="page"] { background:var(--accent-dk); color:#fff; box-shadow:0 3px 0 #7a4433; }
 .box { background:var(--soft); border-radius:16px; padding:12px 16px; margin:10px 0; }
 .box p { margin:4px 0; }
+.box a { color:var(--ink); }
 table { width:100%; border-collapse:collapse; margin:8px 0; font-size:14px; }
 th, td { text-align:left; vertical-align:top; padding:8px 10px; border-bottom:2px solid var(--soft); }
 th { font-weight:900; }
@@ -32,6 +33,6 @@ th { font-weight:900; }
 mark.todo { background:#f2c46b; color:#6b4a1a; border-radius:6px; padding:0 5px; font-weight:800; }
 ul { padding-left:22px; }
 li { margin:3px 0; }
-.back { display:inline-block; margin-top:22px; padding:12px 20px; border-radius:18px; background:var(--accent); color:#fff;
+.back { display:inline-block; margin-top:22px; padding:10px 20px; font-size:19px; border-radius:18px; background:var(--accent); color:#fff;
   text-decoration:none; font-weight:900; box-shadow:0 5px 0 var(--accent-dk); }
 @media (max-width:480px) { .card { padding:20px 16px; border-radius:22px; } .brand { font-size:34px; } }

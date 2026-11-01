@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://blandis.u0f.es/</loc>
+  </url>
+  <url>
+    <loc>https://blandis.u0f.es/how-to-play.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://blandis.u0f.es/how-to-play.html"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://blandis.u0f.es/como-jugar.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://blandis.u0f.es/how-to-play.html"/>
+  </url>
+  <url>
+    <loc>https://blandis.u0f.es/como-jugar.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://blandis.u0f.es/how-to-play.html"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://blandis.u0f.es/como-jugar.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://blandis.u0f.es/how-to-play.html"/>
+  </url>
+  <url>
+    <loc>https://blandis.u0f.es/legal/about.html</loc>
+  </url>
+</urlset>

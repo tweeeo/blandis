@@ -3,19 +3,62 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Blandis</title>
-<meta name="description" content="Blandis — a free browser game: pick, launch, squish and merge soft numbered blobs up to 2048.">
+<title>Blandis – Squishy Physics Merge Puzzle, Free in Your Browser</title>
+<meta name="description" content="Pick, launch and squish soft numbered blobs so equal numbers merge up to 2048. A free physics puzzle game for mobile and desktop browsers: no install, no ads.">
+<link rel="canonical" href="https://blandis.u0f.es/">
 <meta name="theme-color" content="#121010">
-<meta property="og:title" content="Blandis">
-<meta property="og:description" content="Pick, launch, squish and merge soft numbered blobs up to 2048.">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="Blandis">
+<meta property="og:title" content="Blandis – squishy physics merge puzzle">
+<meta property="og:description" content="Pick, launch, squish and merge soft numbered blobs up to 2048. Free in your browser, on mobile and desktop.">
+<meta property="og:url" content="https://blandis.u0f.es/">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="es_ES">
+<meta property="og:image" content="https://blandis.u0f.es/img/blandis-social.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Blandis: soft numbered blobs squishing and merging inside the jar">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://blandis.u0f.es/#website",
+      "name": "Blandis",
+      "url": "https://blandis.u0f.es/",
+      "inLanguage": ["en", "es"]
+    },
+    {
+      "@type": "VideoGame",
+      "@id": "https://blandis.u0f.es/#game",
+      "name": "Blandis",
+      "url": "https://blandis.u0f.es/",
+      "description": "A free physics puzzle game for the browser: pick, launch, squish and merge soft numbered blobs up to 2048.",
+      "image": "https://blandis.u0f.es/img/blandis-social.png",
+      "genre": ["Puzzle", "Physics puzzle"],
+      "gamePlatform": "Web browser",
+      "applicationCategory": "GameApplication",
+      "operatingSystem": "Any (web browser)",
+      "playMode": "SinglePlayer",
+      "inLanguage": ["en", "es"],
+      "isAccessibleForFree": true,
+      "author": { "@type": "Person", "name": "Joel" },
+      "license": "https://polyformproject.org/licenses/noncommercial/1.0.0/",
+      "subjectOf": { "@type": "WebPage", "url": "https://blandis.u0f.es/how-to-play.html", "name": "How to play Blandis" }
+    }
+  ]
+}
+</script>
 <link rel="preload" href="fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/style.css">
 <script type="module" src="src/main.js"></script>
 </head>
 <body>
-<canvas id="c"></canvas>
+<canvas id="c">Blandis is a physics puzzle game: launch soft numbered blobs into the jar and merge equal numbers up to 2048. <a href="how-to-play.html">How to play</a></canvas>
 <div id="btns">
   <button id="bMute"></button>
   <button id="bPause"></button>
@@ -25,6 +68,6 @@
 <div id="toast" role="status" aria-live="polite"></div>
 <div id="update" class="hide" role="status" aria-live="polite"></div>
 <div id="consent" class="hide" role="region" aria-label="Cookies"></div>
-<noscript>Blandis needs JavaScript to run.</noscript>
+<noscript>Blandis needs JavaScript to run. <a href="how-to-play.html">How to play Blandis</a> · <a href="como-jugar.html" hreflang="es" lang="es">Cómo jugar</a> · <a href="legal/about.html">About</a></noscript>
 </body>
 </html>

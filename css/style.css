@@ -30,7 +30,7 @@ canvas { position:fixed; inset:0; width:100%; height:100%; display:block; }
 @keyframes pop { from { transform:scale(.7); opacity:0 } }
 h1 { font-size:54px; margin:0 0 4px; font-weight:900; letter-spacing:-1px; color:var(--accent); text-shadow:0 4px 0 var(--accent-dk); }
 h2 { margin:0 0 14px; font-weight:900; font-size:28px; }
-.sub { margin:0 0 20px; opacity:.75; font-weight:600; }
+.sub { margin:0 0 20px; opacity:.8; font-weight:600; }
 .card button.big { display:block; width:100%; margin:10px 0; padding:14px; font:inherit; font-weight:900; font-size:20px;
   border:0; border-radius:18px; background:var(--accent); color:#fff; cursor:pointer; box-shadow:0 5px 0 var(--accent-dk); }
 .card button.big.alt { background:var(--soft); color:var(--ink); box-shadow:0 5px 0 var(--soft-dk); }
@@ -74,8 +74,8 @@ ol { text-align:left; margin:12px auto; padding-left:28px; max-width:220px; font
 .card input:focus { outline:none; border-color:var(--accent); }
 .card input.bad { border-color:#c0392b; }
 .sub .opt { margin-left:6px; }
-.note { margin:4px 0 10px; font-size:12px; font-weight:600; opacity:.75; line-height:1.4; }
-.legal { margin:14px 0 0; font-size:12px; font-weight:700; opacity:.6; }
+.note { margin:4px 0 10px; font-size:12px; font-weight:600; opacity:.8; line-height:1.4; }
+.legal { margin:14px 0 0; font-size:12px; font-weight:700; opacity:.8; }
 .note a, .legal a, .check a { color:inherit; }
 .shareText { display:block; width:100%; min-height:84px; margin:10px 0; padding:10px 12px; resize:none; border-radius:14px;
   border:2px solid var(--soft-dk); background:#fff; color:var(--ink); font:inherit; font-weight:700; font-size:14px;
@@ -139,7 +139,7 @@ ol.lb li.me { color:var(--accent); }
 #consent p { margin:0 0 16px; line-height:1.4; }
 #consent a { color:inherit; }
 #consent div { display:flex; gap:10px; }
-#consent button { flex:1; font:inherit; font-weight:900; border:0; border-radius:14px; padding:12px; background:var(--accent); color:#fff;
+#consent button { flex:1; font:inherit; font-weight:900; border:0; border-radius:14px; padding:10px 12px; font-size:19px; background:var(--accent); color:#fff;
   cursor:pointer; box-shadow:0 3px 0 var(--accent-dk); }
 
 /* Achievement toast */
