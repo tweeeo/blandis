@@ -14,12 +14,14 @@ html { scrollbar-gutter:stable; scrollbar-color:#3a322c #121010; }
 body { background:#121010; transition:background .4s; }
 /* The game fills the first screen; the page scrolls to the text below it except during a run (body.playing, src/main.js).
    pan-y lets a swipe on the menu scroll the page; during a run every touch on the jar is an aim. */
-#stage { position:relative; height:100vh; height:100svh; overflow:hidden; touch-action:pan-y;
+#stage { position:relative; height:100vh; height:100dvh; overflow:hidden; touch-action:pan-y;
   background:linear-gradient(#1f1b18,#121010); transition:background .4s;
   user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
 body.playing { overflow:hidden; }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior:smooth; } }
 body.playing #stage { touch-action:none; }
+/* Safari's floating toolbar shows the page behind it: keep the text out of sight during a run */
+body.playing .page { display:none; }
 canvas { position:absolute; inset:0; width:100%; height:100%; display:block; }
 
 /* Text about the game, below the first screen */
