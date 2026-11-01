@@ -14,7 +14,7 @@ const freshProgress = () => ({
 // name / pid: global leaderboard nickname and anonymous player id.
 // ga: Google Analytics consent (null = not asked yet).
 // mode: last game mode played · modes: { [mode]: { best, top } } for every mode but classic (src/modes.js).
-export const save = { ...freshProgress(), theme: 'clasico', muted: false, lang: 'en', name: '', pid: '', bg: '', ga: null, mode: 'classic', modes: {} };
+export const save = { ...freshProgress(), theme: 'clasico', muted: false, lang: '', name: '', pid: '', bg: '', ga: null, mode: 'classic', modes: {} };
 
 // cyrb53: small, fast 53-bit string hash.
 function hash(str) {
@@ -43,7 +43,6 @@ try {
   }
 } catch (e) { /* private mode or corrupt data */ }
 delete save.sig;
-if (save.lang !== 'es') save.lang = 'en';
 if (typeof save.name !== 'string') save.name = '';
 if (typeof save.bg !== 'string') save.bg = '';
 if (typeof save.ga !== 'boolean') save.ga = null;

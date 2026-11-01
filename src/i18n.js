@@ -1,4 +1,11 @@
 import { save, persist } from './storage.js';
+import ca from './lang/ca.js';
+import fr from './lang/fr.js';
+import pt from './lang/pt.js';
+import it from './lang/it.js';
+import ja from './lang/ja.js';
+import ko from './lang/ko.js';
+import ur from './lang/ur.js';
 
 const STR = {
   en: {
@@ -67,18 +74,39 @@ const STR = {
   },
 };
 
-export const LANGS = { en: 'English', es: 'Español' };
+// Extra languages live in src/lang/: { name, ui, modes, themes, ach }. Missing keys fall back to English.
+const EXTRA = { ca, fr, pt, it, ja, ko, ur };
+const RTL = ['ur'];
+for (const [id, L] of Object.entries(EXTRA)) STR[id] = { ...STR.en, ...L.ui };
+
+export const LANGS = { en: 'English', es: 'Español', ...Object.fromEntries(Object.entries(EXTRA).map(([id, L]) => [id, L.name])) };
+
+/** Adds the extra languages to a table of `{ name, desc? }` entries; `kind` is modes | themes | ach. */
+export function addLangs(table, kind) {
+  for (const [key, item] of Object.entries(table))
+    for (const [lang, L] of Object.entries(EXTRA)) {
+      const [name, desc] = [].concat(L[kind][item.id ?? key] ?? []);
+      if (name) item.name[lang] = name;
+      if (desc) item.desc[lang] = desc;
+    }
+}
 
 /** UI string by key. */
 export const t = key => STR[save.lang][key];
-/** Pick the current language from an inline `{ en, es }` object. */
-export const tx = obj => obj[save.lang];
+/** Pick the current language from an inline `{ en, es, … }` object (English if missing). */
+export const tx = obj => obj[save.lang] ?? obj.en;
 /** Seconds -> "m:ss". */
 export const formatTime = sec => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, '0')}`;
 
 export function setLang(lang) {
   save.lang = lang;
-  document.documentElement.lang = lang;
+  applyLang();
   persist();
 }
-document.documentElement.lang = save.lang;
+function applyLang() {
+  document.documentElement.lang = save.lang;
+  document.documentElement.dir = RTL.includes(save.lang) ? 'rtl' : 'ltr';
+}
+// First visit (or unknown saved value): the browser's language if we have it.
+if (!STR[save.lang]) save.lang = [navigator.language?.slice(0, 2)].find(l => STR[l]) || 'en';
+applyLang();

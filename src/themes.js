@@ -1,4 +1,5 @@
 import { save, persist } from './storage.js';
+import { addLangs } from './i18n.js';
 
 // Colors are [hue, saturation%, lightness%] per level (0 = "2" … 10 = "2048").
 const BASE_H = [350, 18, 42, 80, 145, 180, 205, 235, 270, 310, 330];
@@ -18,6 +19,7 @@ export const THEMES = {
   noche:    { name: { en: 'Night', es: 'Noche' },       bg: ['#0d1330', '#262d5c'], ink: '#eae8ff', jar: '#080b1e', col: l => [190 + l * 12, 60, 56 + l * 1.8] },
   arcoiris: { name: { en: 'Rainbow', es: 'Arcoíris' },  bg: ['#fffdf7', '#efe4ff'], ink: '#4a2f5c', jar: '#221a2e', col: (l, t) => [(l * 33 + t * 70) % 360, 90, 64] },
 };
+addLangs(THEMES, 'themes');
 
 export const hsl = (c, dl = 0, a = 1) => `hsla(${c[0]},${c[1]}%,${Math.max(0, Math.min(100, c[2] + dl))}%,${a})`;
 

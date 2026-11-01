@@ -1,7 +1,7 @@
 // Game modes: each one adds a rule on top of the classic game (applied in src/game.js).
 // Results are kept per mode; classic keeps its original save fields (save.best / save.top).
 import { save } from './storage.js';
-import { formatTime } from './i18n.js';
+import { formatTime, addLangs } from './i18n.js';
 
 const M = (icon, en, es, den, des, rules = {}) => ({ icon, name: { en, es }, desc: { en: den, es: des }, ...rules });
 
@@ -14,6 +14,7 @@ export const MODES = {
   sprint: M('🏁', 'Sprint 512', 'Sprint 512', 'Make a 512 as fast as you can.', 'Consigue un 512 lo más rápido posible.', { goal: 8, byTime: true }),
   shots: M('🎯', '40 shots', '40 tiros', 'Only 40 launches: make every one count.', 'Solo 40 lanzamientos: que cada uno cuente.', { shots: 40 }),
 };
+addLangs(MODES, 'modes');
 if (!MODES[save.mode]) save.mode = 'classic';
 
 /** { best, top } of a mode (best 0 = none yet). */

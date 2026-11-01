@@ -22,7 +22,7 @@ body.playing { overflow:hidden; }
 body.playing #stage { touch-action:none; }
 /* Safari's floating toolbar shows the page behind it: keep the text out of sight during a run */
 body.playing .page { display:none; }
-canvas { position:absolute; inset:0; width:100%; height:100%; display:block; }
+canvas { position:absolute; inset:0; width:100%; height:100%; display:block; direction:ltr; }
 
 /* Text about the game, below the first screen */
 .page { width:min(720px, calc(100% - 32px)); margin:24px auto 40px; padding:26px 24px; border-radius:28px;
@@ -30,7 +30,7 @@ canvas { position:absolute; inset:0; width:100%; height:100%; display:block; }
   box-shadow:0 10px 0 rgba(0,0,0,.12), 0 20px 50px rgba(0,0,0,.25); }
 .page h1 { margin:0 0 10px; font-size:30px; font-weight:900; line-height:1.2; }
 .page h2 { margin:26px 0 8px; font-size:21px; }
-.page ul { padding-left:22px; }
+.page ul { padding-inline-start:22px; }
 .page a { color:var(--accent-dk); font-weight:800; }
 .card .more { display:inline-block; margin-top:12px; font-size:14px; font-weight:800; color:inherit; opacity:.8; }
 
@@ -58,7 +58,7 @@ h2 { margin:0 0 14px; font-weight:900; font-size:28px; }
 .card button.big:active { transform:translateY(3px); box-shadow:0 2px 0 var(--accent-dk); }
 .score { font-size:60px; font-weight:900; margin:4px 0; color:var(--accent); }
 .badge { display:inline-block; background:#f2c46b; color:#6b4a1a; border-radius:99px; padding:4px 12px; font-weight:900; font-size:14px; }
-ol { text-align:left; margin:12px auto; padding-left:28px; max-width:220px; font-weight:800; }
+ol { text-align:start; margin:12px auto; padding-inline-start:28px; max-width:220px; font-weight:800; }
 
 /* Styles grid */
 .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:8px; }
@@ -70,7 +70,7 @@ ol { text-align:left; margin:12px auto; padding-left:28px; max-width:220px; font
 .sw small { display:block; font-weight:600; font-size:11px; opacity:.8; }
 
 /* Achievements */
-.ach { display:flex; align-items:center; gap:12px; text-align:left; padding:10px; border-radius:16px; background:var(--soft); margin-bottom:8px; }
+.ach { display:flex; align-items:center; gap:12px; text-align:start; padding:10px; border-radius:16px; background:var(--soft); margin-bottom:8px; }
 .ach b { display:block; }
 .ach span { font-size:13px; opacity:.8; }
 .ach .ic { font-size:22px; width:30px; text-align:center; }
@@ -83,8 +83,8 @@ ol { text-align:left; margin:12px auto; padding-left:28px; max-width:220px; font
 
 /* Settings */
 .row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; margin:8px 0;
-  border-radius:16px; background:var(--soft); text-align:left; }
-.row > div { display:flex; gap:6px; }
+  border-radius:16px; background:var(--soft); text-align:start; }
+.row > div { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:6px; }
 .opt { font:inherit; font-weight:800; font-size:14px; padding:8px 12px; border-radius:12px; border:0; cursor:pointer; background:transparent; color:var(--ink); }
 .opt.on { background:var(--accent); color:#fff; }
 .tabs { display:flex; justify-content:center; gap:4px; padding:4px; border-radius:14px; background:var(--soft); }
@@ -94,25 +94,25 @@ ol { text-align:left; margin:12px auto; padding-left:28px; max-width:220px; font
   border:2px solid var(--soft-dk); background:#fff; color:var(--ink); user-select:text; -webkit-user-select:text; }
 .card input:focus { outline:none; border-color:var(--accent); }
 .card input.bad { border-color:#c0392b; }
-.sub .opt { margin-left:6px; }
+.sub .opt { margin-inline-start:6px; }
 .note { margin:4px 0 10px; font-size:12px; font-weight:600; opacity:.8; line-height:1.4; }
 .legal { margin:14px 0 0; font-size:12px; font-weight:700; opacity:.8; }
 .note a, .legal a, .check a { color:inherit; }
 .shareText { display:block; width:100%; min-height:84px; margin:10px 0; padding:10px 12px; resize:none; border-radius:14px;
   border:2px solid var(--soft-dk); background:#fff; color:var(--ink); font:inherit; font-weight:700; font-size:14px;
   user-select:text; -webkit-user-select:text; }
-.check { display:flex; gap:8px; align-items:flex-start; text-align:left; margin:2px 0 6px; padding:6px 8px; border-radius:12px;
+.check { display:flex; gap:8px; align-items:flex-start; text-align:start; margin:2px 0 6px; padding:6px 8px; border-radius:12px;
   font-size:13px; font-weight:700; line-height:1.4; cursor:pointer; }
 .check input { flex:none; width:18px; height:18px; margin:1px 0 0; padding:0; accent-color:var(--accent); }
 .check.bad { background:#f7d9cf; color:#8a2e1a; }
 
 /* Global leaderboard */
-ol.lb { max-width:none; padding-left:34px; }
+ol.lb { max-width:none; padding-inline-start:34px; }
 ol.lb li { padding:3px 0; overflow-wrap:anywhere; }
-ol.lb li b { float:right; margin-left:10px; }
+ol.lb li b { float:inline-end; margin-inline-start:10px; }
 ol.lb li.me { color:var(--accent); }
 
-.help { text-align:left; font-weight:600; line-height:1.5; padding-left:20px; }
+.help { text-align:start; font-weight:600; line-height:1.5; padding-inline-start:20px; }
 
 /* Live leaderboard beside the jar (wide screens only; placed by src/ui/sidebar.js) */
 #side { position:absolute; width:260px; z-index:6; pointer-events:none; background:var(--card); color:var(--ink);

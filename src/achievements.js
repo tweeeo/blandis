@@ -1,5 +1,5 @@
 import { save, persist } from './storage.js';
-import { t, tx } from './i18n.js';
+import { t, tx, addLangs } from './i18n.js';
 import { THEMES } from './themes.js';
 import { sfx } from './audio.js';
 import { toast } from './ui/toast.js';
@@ -100,6 +100,7 @@ export const ACHIEVEMENTS = [
   A('collector50', '🗃️', 'Hoarder', 'Acumulador', 'Unlock 50 achievements', 'Desbloquea 50 logros'),
   A('complete', '💎', 'Completionist', 'Completista', 'Unlock every other achievement', 'Desbloquea todos los demás logros'),
 ];
+addLangs(ACHIEVEMENTS, 'ach');
 
 export const isThemeUnlocked = id =>
   id === 'clasico' || ACHIEVEMENTS.some(a => a.theme === id && save.ach.includes(a.id));
