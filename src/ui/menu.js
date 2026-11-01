@@ -5,6 +5,7 @@ import { THEMES, hsl, setTheme, setBg } from '../themes.js';
 import { ACHIEVEMENTS, isThemeUnlocked, unlock, unlockedCount } from '../achievements.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { fetchTop, submitScore, deleteScore, NAME_RE } from '../leaderboard.js';
+import { hasAnalytics, setAnalytics } from '../analytics.js';
 
 const esc = s => String(s).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
 const legalLink = (page, label) => `<a href="legal/${page}.html" target="_blank" rel="noopener">${label}</a>`;
@@ -171,6 +172,7 @@ export class Menu {
         return `<h2>${t('settings')}</h2>
           <div class="row"><b>${t('language')}</b><div>${Object.entries(LANGS).map(([id, name]) => opt('lang', id, save.lang === id, name)).join('')}</div></div>
           <div class="row"><b>${t('sound')}</b><div>${opt('sound', 'on', !save.muted, t('on'))}${opt('sound', 'off', save.muted, t('off'))}</div></div>
+          ${hasAnalytics ? `<div class="row"><b>${t('analytics')}</b><div>${opt('ga', 'on', save.ga, t('on'))}${opt('ga', 'off', !save.ga, t('off'))}</div></div>` : ''}
           <div class="row"><b>${t('name')}</b><input id="nameSet" maxlength="16" value="${esc(save.name)}" placeholder="${t('yourName')}" autocomplete="nickname"></div>
           <p class="note">${t('publicNote')} ${legalLink('privacy', t('privacy'))}</p>
           ${save.pid ? btn('delMine', `🗑 ${this.confirmDel ? t('delConfirm') : t('delMine')}`) : ''}
@@ -231,6 +233,7 @@ export class Menu {
         if (v !== save.lang) { setLang(v); unlock('polyglot'); }
         this.refreshButtons(); this.show('settings', false); break;
       case 'sound': save.muted = v === 'off'; persist(); this.refreshButtons(); this.show('settings', false); break;
+      case 'ga': setAnalytics(v === 'on'); this.show('settings', false); break;
       case 'theme':
         if (v !== save.theme) { setTheme(v); unlock('fashion'); }
         this.show('styles', false); break;

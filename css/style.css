@@ -127,6 +127,17 @@ ol.lb li.me { color:var(--accent); }
 #update button { font:inherit; font-weight:900; border:0; border-radius:12px; padding:8px 12px; background:var(--accent); color:#fff;
   cursor:pointer; box-shadow:0 3px 0 var(--accent-dk); white-space:nowrap; }
 
+/* Analytics consent banner (src/analytics.js): centred over a dimmed screen; both choices look the same on purpose */
+#consent { position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:10; width:min(400px,calc(100vw - 32px));
+  background:var(--card); color:var(--ink); padding:22px 20px; border-radius:24px; font-weight:700; font-size:15px; text-align:center;
+  box-shadow:0 0 0 100vmax rgba(0,0,0,.45), 0 12px 30px rgba(0,0,0,.25); }
+#consent.hide { display:none; }
+#consent p { margin:0 0 16px; line-height:1.4; }
+#consent a { color:inherit; }
+#consent div { display:flex; gap:10px; }
+#consent button { flex:1; font:inherit; font-weight:900; border:0; border-radius:14px; padding:12px; background:var(--accent); color:#fff;
+  cursor:pointer; box-shadow:0 3px 0 var(--accent-dk); }
+
 /* Achievement toast */
 #toast { position:fixed; left:50%; top:16px; transform:translate(-50%,-140%); background:var(--card); color:var(--ink);
   padding:12px 18px; border-radius:18px; font-weight:800; box-shadow:0 6px 0 rgba(0,0,0,.12); z-index:9;

@@ -20,6 +20,8 @@ const STR = {
     joinTerms: (terms, privacy) => `I'm 14 or older and I accept the ${terms} and the ${privacy} of the global top.`,
     bgUrl: 'Background image URL', apply: 'Apply', bgDel: 'Remove background', bgError: "Couldn't load that image.",
     delMine: 'Delete my global score', delConfirm: 'Tap again to delete it', deleted: 'Your global score has been deleted.',
+    consentText: 'Can Blandis use Google Analytics cookies to count visits and see how the game is played? They are only set if you accept.',
+    moreInfo: 'More info', accept: 'Accept', reject: 'Reject', analytics: 'Analytics',
     helpList: [
       'Up to 3 blobs wait in the tray at the top. Press the one you want to use.',
       'Drag toward where it should go (an arrow shows the shot) and release. The further you drag, the harder it flies.',
@@ -49,6 +51,8 @@ const STR = {
     joinTerms: (terms, privacy) => `Tengo 14 años o más y acepto los ${terms} y la ${privacy} del top mundial.`,
     bgUrl: 'URL de imagen de fondo', apply: 'Aplicar', bgDel: 'Borrar fondo', bgError: 'No se pudo cargar esa imagen.',
     delMine: 'Borrar mi puntuación mundial', delConfirm: 'Pulsa otra vez para borrarla', deleted: 'Tu puntuación mundial se ha borrado.',
+    consentText: '¿Puede Blandis usar cookies de Google Analytics para contar visitas y ver cómo se juega? Solo se activan si aceptas.',
+    moreInfo: 'Más info', accept: 'Aceptar', reject: 'Rechazar', analytics: 'Analítica',
     helpList: [
       'Hasta 3 blandis esperan en la bandeja de arriba. Pulsa el que quieras usar.',
       'Arrastra hacia donde quieras lanzarlo (una flecha marca el tiro) y suelta. Cuanto más arrastras, más fuerte.',

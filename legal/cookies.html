@@ -18,12 +18,12 @@
     <a href="about.html">About</a>
   </nav>
   <h1>Cookie policy</h1>
-  <p class="updated">Last updated: 31 October 2026</p>
+  <p class="updated">Last updated: 1 November 2026</p>
 
   <h2>1. Summary</h2>
   <div class="box">
-    <p><b>Blandis does not use cookies.</b> It has no analytics, advertising, social media or tracking technologies.</p>
-    <p>It uses one entry in your browser's <b>local storage</b> to save your game on your own device. This is strictly necessary for features you ask for (keeping your progress and settings), so no consent banner is shown.</p>
+    <p>Blandis uses one entry in your browser's <b>local storage</b> to save your game on your own device. This is strictly necessary for features you ask for (keeping your progress and settings), so it does not need consent.</p>
+    <p>Only if you accept it, Blandis also uses <b>Google Analytics</b> cookies to count visits and see how the game is used. If you reject them or don't answer, they are not set and nothing is loaded from Google. There is no advertising, social media or other tracking.</p>
   </div>
 
   <h2>2. What is stored on your device</h2>
@@ -36,19 +36,36 @@
       <td>Saves your best score, recent scores, achievements, statistics and settings (style, sound, language). If you join the global leaderboard, it also keeps your nickname and a random player identifier so that your entry can be updated or deleted.</td>
       <td>Until you clear your browser's site data</td>
     </tr>
+    <tr>
+      <td><code>_ga</code></td>
+      <td>Cookie</td>
+      <td>Google Analytics (third party)</td>
+      <td>Analytics, only with consent: a random identifier that tells visitors apart and recognises returning ones.</td>
+      <td>2 years</td>
+    </tr>
+    <tr>
+      <td><code>_ga_&lt;id&gt;</code></td>
+      <td>Cookie</td>
+      <td>Google Analytics (third party)</td>
+      <td>Analytics, only with consent: keeps the state of the current visit (session).</td>
+      <td>2 years</td>
+    </tr>
   </table></div>
   <p>Nothing is written until you change a setting or finish a game, and the player identifier is only created when you join the global leaderboard.</p>
-  <p>Category: <b>strictly necessary / preferences chosen by the user</b>. Under Article 22.2 of the Spanish LSSI-CE and the ePrivacy Directive, storage that is strictly necessary to provide a service the user has explicitly requested does not require consent.</p>
+  <p>The <code>blandis-v2</code> entry also remembers whether you accepted or rejected analytics, so you are not asked again.</p>
+  <p>Category of <code>blandis-v2</code>: <b>strictly necessary / preferences chosen by the user</b>. Under Article 22.2 of the Spanish LSSI-CE and the ePrivacy Directive, storage that is strictly necessary to provide a service the user has explicitly requested does not require consent.</p>
   <p>This data is not used to track you. It stays on your device, except when you take part in the leaderboard: then your nickname, player identifier, score, game duration and number of merges are sent with each game, as explained in the <a href="privacy.html">Privacy policy</a>.</p>
 
   <h2>3. Third parties</h2>
-  <p>The game does not load content from third parties: fonts and all other files are served with the game itself. When this policy was last updated, the responses of the website host (GitHub Pages) and of the leaderboard server (Cloudflare Workers) did not set any cookies.</p>
+  <p>Apart from Google Analytics (only after you accept it), the game does not load content from third parties: fonts and all other files are served with the game itself. When this policy was last updated, the responses of the website host (GitHub Pages) and of the leaderboard server (Cloudflare Workers) did not set any cookies.</p>
 
-  <h2>4. Optional technologies</h2>
-  <p>There are none. If any are added in the future (for example, analytics), they will only be used after you give consent, and this policy will be updated.</p>
+  <h2>4. Analytics (optional)</h2>
+  <p>On your first visit a banner asks whether you accept analytics cookies; <b>Accept</b> and <b>Reject</b> are equally easy. If you accept, the game loads Google Analytics from Google's servers and sets the cookies above, only for this website. Google signals and ad personalisation are turned off. What data Google receives is explained in the <a href="privacy.html">Privacy policy</a>.</p>
+  <p>You can change your choice at any time in the game, in <b>Settings → Analytics</b>. Turning it off stops Google Analytics and deletes its cookies.</p>
+  <p>Category: <b>analytics</b>. Used only with your consent (Article 22.2 LSSI-CE).</p>
 
   <h2>5. How to delete it</h2>
-  <p>You can delete the stored data at any time from your browser's settings (site data or storage for this website). Doing so resets your progress, achievements and settings. If you take part in the leaderboard, use <b>Settings → Delete my global score</b> in the game <i>before</i> clearing your browser data; afterwards your entry can no longer be linked to you and will only be removed automatically after 12 months without new games.</p>
+  <p>To withdraw analytics consent, use <b>Settings → Analytics</b> in the game. You can delete all stored data at any time from your browser's settings (site data or storage for this website). Doing so resets your progress, achievements and settings. If you take part in the leaderboard, use <b>Settings → Delete my global score</b> in the game <i>before</i> clearing your browser data; afterwards your entry can no longer be linked to you and will only be removed automatically after 12 months without new games.</p>
 
   <a class="back" href="../">Back to the game</a>
 </main>
