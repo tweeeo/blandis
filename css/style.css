@@ -94,22 +94,15 @@ h2 .ico { width:1em; height:1em; vertical-align:-0.15em; margin-inline-end:6px; 
 .row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; margin:8px 0;
   border-radius:16px; background:var(--soft); text-align:start; }
 .row > div { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:6px; }
-.row.row-lang { gap:8px; }
-.row.row-lang b { flex-shrink:0; }
-.lang-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:3px; padding:4px;
-  border-radius:14px; background:rgba(0,0,0,.04); flex:1; max-width:245px; }
-.lang-grid .opt { font-size:clamp(11px, 2.7vw, 12.5px); font-weight:800; padding:6px 2px;
-  text-align:center; border-radius:10px; white-space:nowrap; transition:background .15s, color .15s; }
-.lang-grid .opt:hover:not(.on) { background:rgba(255,255,255,.55); }
-.lang-grid .opt.on { background:var(--accent); color:#fff; box-shadow:0 2px 4px rgba(0,0,0,.1); }
 .opt { font:inherit; font-weight:800; font-size:14px; padding:8px 12px; border-radius:12px; border:0; cursor:pointer; background:transparent; color:var(--ink); }
 .opt.on { background:var(--accent); color:#fff; }
 .tabs { display:flex; justify-content:center; gap:4px; padding:4px; border-radius:14px; background:var(--soft); }
 .tabs .opt { flex:1; font-size:18px; padding:6px 0; }
 
-.card input { flex:1; min-width:0; font:inherit; font-weight:800; font-size:15px; padding:8px 12px; border-radius:12px;
+.card input, .card select { flex:1; min-width:0; font:inherit; font-weight:800; font-size:15px; padding:8px 12px; border-radius:12px;
   border:2px solid var(--soft-dk); background:#fff; color:var(--ink); user-select:text; -webkit-user-select:text; }
-.card input:focus { outline:none; border-color:var(--accent); }
+.card select { flex:0 1 auto; cursor:pointer; }
+.card input:focus, .card select:focus { outline:none; border-color:var(--accent); }
 .card input.bad { border-color:#c0392b; }
 .sub .opt { margin-inline-start:6px; }
 .note { margin:4px 0 10px; font-size:12px; font-weight:600; opacity:.8; line-height:1.4; }

@@ -41,6 +41,10 @@ export class Menu {
     // Nickname inputs: Enter sends from the game-over screen, settings saves on change.
     this.overlay.addEventListener('keydown', e => { if (e.key === 'Enter') { if (e.target.id === 'lbName') this.sendName(); if (e.target.id === 'bgUrl') this.applyBg(); } });
     this.overlay.addEventListener('change', e => {
+      if (e.target.id === 'langSet') {
+        unlockAudio(); sfx.click(); setLang(e.target.value); unlock('polyglot');
+        this.refreshButtons(); this.show('settings', false); return;
+      }
       if (e.target.id !== 'nameSet') return;
       const n = e.target.value.trim();
       if (!n || NAME_RE.test(n)) { save.name = n; persist(); } else e.target.value = save.name;
@@ -153,7 +157,7 @@ export class Menu {
   html(screen) {
     const g = this.game;
     const btn = (a, label, alt = true) => `<button class="big ${alt ? 'alt' : ''}" data-a="${a}">${label}</button>`;
-    const opt = (a, v, on, label) => `<button class="opt ${on ? 'on' : ''}" data-a="${a}" data-v="${v}">${label}</button>`;
+    const opt = (a, v, on, label, title) => `<button class="opt ${on ? 'on' : ''}" data-a="${a}" data-v="${v}"${title ? ` title="${title}"` : ''}>${label}</button>`;
     const best = `<p class="sub">${t('best')}: <b>${save.best}</b></p>`;
     const back = btn('back', t('back'), false);
     const achBtn = btn('ach', `${iconTrophy()} ${t('ach')} ${unlockedCount()}/${ACHIEVEMENTS.length}`);
@@ -190,11 +194,12 @@ export class Menu {
       }
       case 'lb':
         return `<h2>${iconGlobe()} ${t('globalTop')}</h2>
-          <div class="tabs">${Object.entries(MODES).map(([id, m]) => opt('lbMode', id, this.lbMode === id, m.icon)).join('')}</div>
+          <div class="tabs">${Object.entries(MODES).map(([id, m]) => opt('lbMode', id, this.lbMode === id, m.icon, tx(m.name))).join('')}</div>
           <p class="sub">${tx(MODES[this.lbMode].name)}</p><div id="lbList"><p class="sub">${t('loading')}</p></div>${back}`;
       case 'settings':
         return `<h2>${t('settings')}</h2>
-          <div class="row row-lang"><b>${t('language')}</b><div class="lang-grid">${Object.entries(LANGS).map(([id, name]) => opt('lang', id, save.lang === id, name)).join('')}</div></div>
+          <div class="row"><b>${t('language')}</b><select id="langSet">${Object.entries(LANGS).map(([id, name]) =>
+            `<option value="${id}" lang="${id}" ${save.lang === id ? 'selected' : ''}>${name}</option>`).join('')}</select></div>
           <div class="row"><b>${t('sound')}</b><div>${opt('sound', 'on', !save.muted, t('on'))}${opt('sound', 'off', save.muted, t('off'))}</div></div>
           ${hasAnalytics ? `<div class="row"><b>${t('analytics')}</b><div>${opt('ga', 'on', save.ga, t('on'))}${opt('ga', 'off', !save.ga, t('off'))}</div></div>` : ''}
           <div class="row"><b>${t('name')}</b><input id="nameSet" maxlength="16" value="${esc(save.name)}" placeholder="${t('yourName')}" autocomplete="nickname"></div>
@@ -257,9 +262,6 @@ export class Menu {
       case 'share': this.share(el); break;
       case 'sendName': this.sendName(); break;
       case 'back': this.show(this.screen === 'styles' ? 'settings' : this.base); break;
-      case 'lang':
-        if (v !== save.lang) { setLang(v); unlock('polyglot'); }
-        this.refreshButtons(); this.show('settings', false); break;
       case 'sound': save.muted = v === 'off'; persist(); this.refreshButtons(); this.show('settings', false); break;
       case 'ga': setAnalytics(v === 'on'); this.show('settings', false); break;
       case 'theme':

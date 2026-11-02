@@ -75,43 +75,25 @@ export class Renderer {
   }
 
   draw() {
-    const { game } = this, isAttract = game.state === 'attract';
-    const mainCtx = this.mainCtx;
+    const { game, mainCtx } = this, { s, dpr, ox, oy } = this.view, fx = game.fx;
+    // Behind the menu the jar is drawn into a small buffer and scaled up: cheaper, and the softness reads as a backdrop.
+    const attract = game.state === 'attract', ctx = this.ctx = attract ? this.bgCtx : mainCtx, k = attract ? this.bgScale : dpr;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    const shx = (Math.random() - 0.5) * fx.shake, shy = (Math.random() - 0.5) * fx.shake;
+    ctx.setTransform(k * s, 0, 0, k * s, k * (ox + shx * s), k * (oy + shy * s));
 
-    if (isAttract) {
-      this.ctx = this.bgCtx;
-      const { s, ox, oy } = this.view, k = this.bgScale;
-      this.bgCtx.setTransform(1, 0, 0, 1, 0, 0);
-      this.bgCtx.clearRect(0, 0, this.bgCv.width, this.bgCv.height);
+    this.drawJar();
+    if (!attract) this.drawTray();
+    for (const b of game.world.blobs) this.drawBody(b.px, b.py, b.n, b.level, b.cx, b.cy, b.r * b.scale, b.happy > 0);
+    this.drawAim();
+    this.drawEffects();
+    if (!attract) this.drawHud();
 
-      this.bgCtx.filter = 'blur(1.5px)';
-      this.bgCtx.setTransform(k * s, 0, 0, k * s, k * ox, k * oy);
-
-      this.drawJar();
-      for (const b of game.world.blobs) this.drawBody(b.px, b.py, b.n, b.level, b.cx, b.cy, b.r * b.scale, b.happy > 0);
-      this.drawEffects();
-
-      this.bgCtx.filter = 'none';
-
+    if (attract) {
       mainCtx.setTransform(1, 0, 0, 1, 0, 0);
       mainCtx.clearRect(0, 0, this.cv.width, this.cv.height);
       mainCtx.drawImage(this.bgCv, 0, 0, this.cv.width, this.cv.height);
-
-      this.ctx = mainCtx;
-    } else {
-      this.ctx = mainCtx;
-      const { s, dpr, ox, oy } = this.view, fx = game.fx;
-      mainCtx.setTransform(1, 0, 0, 1, 0, 0);
-      mainCtx.clearRect(0, 0, this.cv.width, this.cv.height);
-      const shx = (Math.random() - 0.5) * fx.shake, shy = (Math.random() - 0.5) * fx.shake;
-      mainCtx.setTransform(dpr * s, 0, 0, dpr * s, dpr * (ox + shx * s), dpr * (oy + shy * s));
-
-      this.drawJar();
-      this.drawTray();
-      for (const b of game.world.blobs) this.drawBody(b.px, b.py, b.n, b.level, b.cx, b.cy, b.r * b.scale, b.happy > 0);
-      this.drawAim();
-      this.drawEffects();
-      this.drawHud();
     }
   }
 
