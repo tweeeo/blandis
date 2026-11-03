@@ -41,7 +41,8 @@ export function setAnalytics(on) {
 if (GA_ID) {
   if (save.ga) load();
   else if (save.ga === null) {
-    el.innerHTML = `<p>${t('consentText')} <a href="legal/cookies.html" target="_blank" rel="noopener">${t('moreInfo')}</a></p>
+    const cookiePage = save.lang === 'es' ? 'legal/cookies-es.html' : 'legal/cookies.html';
+    el.innerHTML = `<p>${t('consentText')} <a href="${cookiePage}" target="_blank" rel="noopener">${t('moreInfo')}</a></p>
       <div><button data-v="0">${t('reject')}</button><button data-v="1">${t('accept')}</button></div>`;
     el.onclick = e => { const b = e.target.closest('button'); if (b) setAnalytics(b.dataset.v === '1'); };
     el.classList.remove('hide');

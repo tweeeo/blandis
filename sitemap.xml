@@ -17,5 +17,14 @@
   </url>
   <url>
     <loc>https://blandis.u0f.es/legal/about.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://blandis.u0f.es/legal/about.html"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://blandis.u0f.es/legal/sobre.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://blandis.u0f.es/legal/about.html"/>
+  </url>
+  <url>
+    <loc>https://blandis.u0f.es/legal/sobre.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://blandis.u0f.es/legal/about.html"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://blandis.u0f.es/legal/sobre.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://blandis.u0f.es/legal/about.html"/>
   </url>
 </urlset>

@@ -52,7 +52,7 @@ export const ABOUT = {
 
   <h2>Juega donde quieras</h2>
   <p>Blandis funciona con ratón, pantalla táctil o teclado, en español y en inglés, y va fluido en móviles modestos porque la física avanza a una tasa fija. Es un proyecto personal y sin ánimo de lucro creado por Joel, y el código fuente está en GitHub.</p>
-  <p><a href="como-jugar.html">Guía completa: reglas, controles y preguntas frecuentes</a> · <a href="how-to-play.html" hreflang="en" lang="en">Guía en inglés</a> · <a href="legal/about.html" hreflang="en">Sobre Blandis</a> · <a href="#stage">Volver al juego ↑</a></p>
+  <p><a href="como-jugar.html">Guía completa: reglas, controles y preguntas frecuentes</a> · <a href="how-to-play.html" hreflang="en" lang="en">Guía en inglés</a> · <a href="legal/sobre.html">Sobre Blandis</a> · <a href="#stage">Volver al juego ↑</a></p>
 `,
   ca: `
   <h1>Blandis: un trencaclosques de físiques tovisses</h1>
@@ -79,6 +79,7 @@ export const ABOUT = {
 
   <h2>Juga on vulguis</h2>
   <p>Blandis funciona amb ratolí, pantalla tàctil o teclat, i va fluid en mòbils modests perquè la física avança a un ritme fix. És un projecte personal i sense ànim de lucre creat per en Joel, i el codi font és a GitHub.</p>
-  <p><a href="como-jugar.html">Guia completa: regles i controls</a> · <a href="how-to-play.html" hreflang="en" lang="en">Guia en anglès</a> · <a href="legal/about.html" hreflang="en">Quant a Blandis</a> · <a href="#stage">Tornar al joc ↑</a></p>
+  <p><a href="como-jugar.html">Guia completa: regles i controls</a> · <a href="how-to-play.html" hreflang="en" lang="en">Guia en anglès</a> · <a href="legal/sobre.html">Quant a Blandis</a> · <a href="#stage">Tornar al joc ↑</a></p>
 `
 };
+

@@ -15,7 +15,8 @@ import {
 const END_TITLE = { overflow: 'over', time: 'timeUp', slow: 'tooSlow', shots: 'noShots', goal: 'goalDone' };
 
 const esc = s => String(s).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
-const legalLink = (page, label) => `<a href="legal/${page}.html" target="_blank" rel="noopener">${label}</a>`;
+const LEGAL_ES = { privacy: 'privacidad', cookies: 'cookies-es', terms: 'terminos', about: 'sobre' };
+const legalLink = (page, label) => `<a href="legal/${save.lang === 'es' ? (LEGAL_ES[page] || page) : page}.html" target="_blank" rel="noopener">${label}</a>`;
 // Static, crawlable how-to-play page in the current language.
 const guideLink = label => `<a href="${save.lang === 'es' ? 'como-jugar' : 'how-to-play'}.html" target="_blank" rel="noopener">${label}</a>`;
 
