@@ -6,6 +6,7 @@ import it from './lang/it.js';
 import ja from './lang/ja.js';
 import ko from './lang/ko.js';
 import ur from './lang/ur.js';
+import { ABOUT } from './lang/about.js';
 
 const STR = {
   en: {
@@ -106,7 +107,20 @@ export function setLang(lang) {
 function applyLang() {
   document.documentElement.lang = save.lang;
   document.documentElement.dir = RTL.includes(save.lang) ? 'rtl' : 'ltr';
+  const about = document.getElementById('about-game');
+  if (about) {
+    const lang = ABOUT[save.lang] ? save.lang : 'en';
+    about.innerHTML = ABOUT[lang];
+    about.lang = lang;
+    about.dir = RTL.includes(lang) ? 'rtl' : 'ltr';
+  }
 }
 // First visit (or unknown saved value): the browser's language if we have it.
 if (!STR[save.lang]) save.lang = [navigator.language?.slice(0, 2)].find(l => STR[l]) || 'en';
-applyLang();
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyLang);
+  } else {
+    applyLang();
+  }
+}
